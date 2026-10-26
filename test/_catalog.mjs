@@ -1,0 +1,7 @@
+// Small synthetic catalog shared by the adapter tests.
+export const catalog = { v: 1, device: '{D}', placeholders: { hero: '/h', main: '/m' }, pageTypes: { generalLanding: { name: 'General Landing Page', templateId: '1'.repeat(32), fields: [{ name: 'pageTitle', type: 'Single-Line Text' }], branchId: null } }, components: {
+  hero: { name: 'Hero', renderingId: 'a'.repeat(32), ph: 'hero', themed: false, params: '', fields: [{ name: 'title', type: 'Single-Line Text' }, { name: 'tagline', type: 'Single-Line Text' }, { name: 'cta', type: 'General Link' }], children: [], parent: null, childPh: null, dsTemplateId: 'b'.repeat(32) },
+  accordion: { name: 'Accordion', renderingId: 'c'.repeat(32), ph: 'main', themed: true, params: 'selectTheme', fields: [{ name: 'title', type: 'Single-Line Text' }], children: ['accordionItem'], parent: null, childPh: 'accordion', dsTemplateId: 'd'.repeat(32) },
+  accordionItem: { name: 'Accordion Item', renderingId: 'e'.repeat(32), ph: 'accordion', themed: false, params: '', fields: [{ name: 'heading', type: 'Single-Line Text' }, { name: 'content', type: 'Rich Text' }], children: [], parent: 'accordion', childPh: null, dsTemplateId: 'f'.repeat(32) },
+  richText: { name: 'Rich Text', renderingId: '9'.repeat(32), ph: 'main', themed: false, params: '', fields: [{ name: 'text', type: 'Rich Text' }], children: [], parent: null, childPh: null, dsTemplateId: '8'.repeat(32) },
+} };

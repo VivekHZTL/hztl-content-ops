@@ -1,0 +1,17 @@
+{
+  "name": "set-field",
+  "description": "Set, or regex-replace, one field on many items: pages, datasources, or records under Data.",
+  "when": "A bulk field change the content planner does not cover: fill an image everywhere it is empty, add +1 to phone numbers, hide pages from the sitemap, fix a value on department records.",
+  "inputs": {
+    "paths": "item paths to change (or use root)",
+    "root": "walk this item and everything under it",
+    "template": "only items of this template (name or id)",
+    "field": "field name (required)",
+    "value": "the new value",
+    "replace": "{ pattern, flags, with } instead of value: regex replace on the current value",
+    "onlyEmpty": "true: only items where the field is empty",
+    "limit": "stop after visiting this many items under root (default 5000)"
+  },
+  "version": 1,
+  "provenance": { "created": "2026-10-26", "from": "reference project: hero background fill, phone +1 on pages and department records" }
+}

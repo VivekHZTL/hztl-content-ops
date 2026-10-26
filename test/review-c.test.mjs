@@ -1,0 +1,112 @@
+// Tests added from the phase-C review. Each pins one finding.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { readWorkbook, sheetColumns, detectLayout } from '../plugin/engine/lib/ingest/xlsx.mjs';
+import { proposeProfile, workbookToContent } from '../plugin/engine/lib/ingest/xlsx-adapter.mjs';
+import { applyOverrides } from '../plugin/engine/lib/decisions/register.mjs';
+import { loadSitemap, resolveLinks } from '../plugin/engine/lib/ingest/sitemap.mjs';
+import { deckToContent, proposeSectionMap } from '../plugin/engine/lib/ingest/deck-adapter.mjs';
+import { validateContent, newContent } from '../plugin/engine/lib/content/schema.mjs';
+import { fakeCm } from '../plugin/engine/lib/cm/fake.mjs';
+import { writeJson } from '../plugin/engine/lib/config/project.mjs';
+import { setupCommand } from '../plugin/engine/lib/cli/setup.mjs';
+import { publishCommand } from '../plugin/engine/lib/cli/publish.mjs';
+import { intakeCommand } from '../plugin/engine/lib/cli/intake.mjs';
+import { catalog } from './_catalog.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const wb = readWorkbook(fs.readFileSync(path.join(here, 'fixtures/workbook2.xlsx')));
+const layout = detectLayout(wb.sheets[0]);
+const columns = sheetColumns(wb.sheets[0], layout);
+const profile = proposeProfile(columns, catalog, { tab: 'Clinics', layout, parentPath: '/s/Home/locations' });
+
+test('C1/I2 (RF1): numbered child columns keep their number; extra rows join; a URL column pairs with its link', () => {
+  assert.equal(profile.columns.C.target, 'component.hero.cta');
+  assert.equal(profile.columns.D.target, 'pair');
+  assert.equal(profile.columns.C.pair, 'D');
+  const { contents } = workbookToContent(wb, profile, { catalog, sourceFile: 's.xlsx', sha256: 'x' });
+  const [east, west] = contents;
+  assert.deepEqual(east.components[0].fields.cta, { text: 'Book now', url: 'https://example.org/book' });
+  const acc = east.components.find((c) => c.type === 'accordion');
+  assert.equal(acc.children.length, 2);
+  assert.equal(acc.children[0].fields.heading, 'Parking');
+  assert.equal(acc.children[0].fields.content, 'Free parking.\nSecond paragraph.\nThird paragraph.');
+  assert.equal(acc.children[1].fields.heading, 'Hours');
+  assert.ok(east.flags.some((f) => f.kind === 'confirm' && /joined/.test(f.text)));
+  assert.ok(west.flags.some((f) => f.kind === 'missing-url' && f.where === "'Clinics'!D6"));
+  assert.equal(east.locators['components.0.fields.cta.url'], "'Clinics'!D3");
+  assert.deepEqual(validateContent(east, catalog), []);
+});
+test('I3: a link override keyed on the flagged URL cell applies and clears the missing-url flag; unmatched overrides are reported', () => {
+  const { contents } = workbookToContent(wb, profile, { catalog, sourceFile: 's.xlsx', sha256: 'x' });
+  const west = contents[1];
+  const out = applyOverrides(west, { cells: {}, keys: {}, links: { "'Clinics'!D6": 'https://example.org/call', "'Clinics'!Z99": 'https://nope' }, urls: [] });
+  assert.equal(out.components[0].fields.cta.url, 'https://example.org/call');
+  assert.ok(!out.flags.some((f) => f.kind === 'missing-url' && f.where === "'Clinics'!D6"));
+  assert.deepEqual(out.unmatchedOverrides, ["'Clinics'!Z99"]);
+});
+test('I4/I5/I6: resolveLinks only treats field values as links; blank or absolute sitemap URLs resolve correctly', async () => {
+  const sm = loadSitemap({ '1': { name: 'Heart', url: 'https://www.example.org/services/heart-care#top' }, '2': { name: 'Blank', url: '' } });
+  const items = { ['a'.repeat(32)]: { id: 'a'.repeat(32), name: 'heart-care', path: '/s/Home/services/heart-care', templateId: 't', templateName: 'Page', parentId: '', version: 1, fields: {} } };
+  const c = newContent({ pageId: '1', pageType: 'x', targetPath: '/s/Home/p' });
+  c.components.push({ type: 'richText', fields: { text: '<p>x</p>', cta: { text: 'Heart', pid: '1' }, blank: { text: 'B', pid: '2' } }, children: [] });
+  const out = await resolveLinks(c, { sitemap: sm, cm: fakeCm({ items }), homePath: '/s/Home', ownHosts: ['www.example.org'] });
+  assert.equal(out.components[0].fields.cta.id, 'a'.repeat(32));
+  assert.equal(out.components[0].fields.text, '<p>x</p>');
+  assert.ok(out.flags.some((f) => f.kind === 'pid-fix' && /2/.test(f.text) && /no URL/i.test(f.text)));
+  assert.ok(!out.flags.some((f) => f.kind === 'link-pending'));
+});
+test('I8: deck values spanning several lines append to the field; a repeated label is flagged; ⟨?⟩ links are missing-url', () => {
+  const text = ['Page ID | 7.7', 'Component: Accordion', 'Title | First line', 'continues here', '• a bullet', 'Title | Replaced', 'Panel 1 heading | H', 'Panel 1 copy | ⟦go⟨?⟩'].join('\n');
+  const map = proposeSectionMap(text, catalog);
+  const c = deckToContent(text, map, { catalog, targetPath: '/s/Home/p', sourceFile: 'd.docx' });
+  assert.equal(c.pageId, '7.7');
+  const acc = c.components[0];
+  assert.match(acc.fields.title, /First line\ncontinues here\n• a bullet\nReplaced/);
+  assert.ok(c.flags.some((f) => f.kind === 'confirm' && /repeated/i.test(f.text)));
+  assert.ok(!c.flags.some((f) => f.kind === 'unmapped' && /continues here/.test(f.text)));
+  assert.ok(c.flags.some((f) => f.kind === 'missing-url'));
+  assert.deepEqual(validateContent(c, catalog), []);
+});
+test("validateContent accepts the 'other' component", () => {
+  const c = newContent({ pageId: '1', pageType: 'x', targetPath: '/s/Home/p' });
+  c.components.push({ type: 'other', deckName: 'Mystery', raw: 'text', links: [], fields: {}, children: [] });
+  assert.deepEqual(validateContent(c, catalog), []);
+});
+test('I7: intake suffixes duplicate page ids and merges proposals across files', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cops-i7-'));
+  writeJson(path.join(projectDir, 'answers.json'), { name: 'd', siteRoot: '/sitecore/content/DemoSite/Demo', homePath: '/sitecore/content/DemoSite/Demo/Home', environments: [{ name: 'fake' }] });
+  await setupCommand(['--answers', path.join(projectDir, 'answers.json')], { projectDir, print: false });
+  writeJson(path.join(projectDir, '.content-ops', 'catalog.json'), catalog);
+  fs.copyFileSync(path.join(here, 'fixtures/deck.docx'), path.join(projectDir, 'sources', 'deck-a.docx'));
+  fs.copyFileSync(path.join(here, 'fixtures/deck.docx'), path.join(projectDir, 'sources', 'deck-b.docx'));
+  const first = await intakeCommand(['--page-type', 'generalLanding'], { projectDir, print: false });
+  assert.equal(first.proposed.length, 1, JSON.stringify(first.proposed));
+  const map = JSON.parse(fs.readFileSync(path.join(projectDir, 'work', 'section-map.proposed.json'), 'utf8'));
+  assert.ok(map.sources.length === 2 && map.aliases.accodion === 'accordion');
+  const second = await intakeCommand(['--page-type', 'generalLanding', '--section-map', path.join(projectDir, 'work', 'section-map.proposed.json')], { projectDir, print: false });
+  assert.equal(second.pages, 2);
+  assert.ok(second.written.some((w) => /12\.3\.json$/.test(w)) && second.written.some((w) => /12\.3-2\.json$/.test(w)));
+  assert.ok(second.errors.some((e) => /duplicate/i.test(e)));
+});
+test('I9: publish skips undone journals and reports missing items separately from out-of-scope ones', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cops-i9-'));
+  const H = '/sitecore/content/DemoSite/Demo/Home';
+  writeJson(path.join(projectDir, 'answers.json'), { name: 'd', siteRoot: '/sitecore/content/DemoSite/Demo', homePath: H, environments: [{ name: 'fake' }] });
+  await setupCommand(['--answers', path.join(projectDir, 'answers.json')], { projectDir, print: false });
+  const runDir = path.join(projectDir, 'runs', 'r1_fake_plan'); fs.mkdirSync(path.join(runDir, 'journal'), { recursive: true });
+  writeJson(path.join(runDir, 'plan.json'), { runId: 'r1_fake_plan', env: 'fake', pages: [], sources: [], createdAt: new Date().toISOString() });
+  writeJson(path.join(runDir, 'journal', 'a1_undone.json'), { key: 'u', itemId: 'u'.repeat(32), env: 'fake', applyId: 'a1', status: 'done', manualRollback: { at: 'x', problems: [] }, steps: [] });
+  writeJson(path.join(runDir, 'journal', 'a1_gone.json'), { key: 'g', itemId: 'g'.repeat(32), env: 'fake', applyId: 'a1', status: 'done', steps: [] });
+  writeJson(path.join(runDir, 'journal', 'a1_ok.json'), { key: 'k', itemId: 'a'.repeat(32), env: 'fake', applyId: 'a1', status: 'done', steps: [] });
+  const calls = [];
+  const cmFactory = (env, opts = {}) => ({ env: 'fake', isProd: false, writable: !!opts.allowWrites, async getItem({ id }) { return id === 'a'.repeat(32) ? { id, path: `${H}/x` } : null; }, client: { env: 'fake', isProd: false, writable: !!opts.allowWrites, async mutate(q, v) { calls.push(v); return { publishItem: { operationId: 'op' } }; }, async query() { return { publishingStatus: { isDone: true, isFailed: false } }; } } });
+  await assert.rejects(publishCommand(['--run', 'r1_fake_plan', '--confirm', 'fake'], { projectDir, cmFactory, print: false }), (e) => /not found/i.test(e.message) && /gggg/.test(e.message) && !/uuuu/.test(e.message));
+  fs.rmSync(path.join(runDir, 'journal', 'a1_gone.json'));
+  const dry = await publishCommand(['--run', 'r1_fake_plan', '--confirm', 'fake', '--dry'], { projectDir, cmFactory, print: false });
+  assert.equal(dry.roots.length, 1); assert.equal(dry.skippedUndone, 1); assert.equal(calls.length, 0);
+});

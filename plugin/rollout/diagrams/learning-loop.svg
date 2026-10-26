@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" width="100%" role="img" aria-labelledby="t3 d3">
+  <title id="t3">Content Ops learning loop</title>
+  <desc id="d3">Four stages: every run writes lessons, the project knowledge folder stores them, the next run reads them, export merges them into the shared plugin, which returns to the start.</desc>
+  <style>
+    .dg text { font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .dg .h { font-size: 14px; font-weight: 500; }
+    .dg .s { font-size: 12px; }
+    .dg line { stroke: var(--d-line, #888780); stroke-width: 1.5; }
+  </style>
+  <defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g class="dg">
+    <rect x="170" y="40" width="340" height="56" rx="8" fill="var(--d-gray-bg, #F1EFE8)" stroke="var(--d-gray-line, #5F5E5A)" stroke-width="0.5"/>
+    <text class="h" x="340" y="58" text-anchor="middle" dominant-baseline="central" fill="var(--d-gray-ink, #444441)">Every plan or apply</text>
+    <text class="s" x="340" y="78" text-anchor="middle" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">New column shape, odd template, a fix you accepted</text>
+    <line x1="340" y1="96" x2="340" y2="124" marker-end="url(#ll-arrow)"/>
+    <rect x="170" y="130" width="340" height="56" rx="8" fill="var(--d-teal-bg, #E1F5EE)" stroke="var(--d-teal-line, #0F6E56)" stroke-width="0.5"/>
+    <text class="h" x="340" y="148" text-anchor="middle" dominant-baseline="central" fill="var(--d-teal-ink, #085041)">.content-ops/knowledge/ in the repo</text>
+    <text class="s" x="340" y="168" text-anchor="middle" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">lessons.md · mappings/ · adapters/ · rules.json</text>
+    <line x1="340" y1="186" x2="340" y2="214" marker-end="url(#ll-arrow)"/>
+    <rect x="170" y="220" width="340" height="56" rx="8" fill="var(--d-teal-bg, #E1F5EE)" stroke="var(--d-teal-line, #0F6E56)" stroke-width="0.5"/>
+    <text class="h" x="340" y="238" text-anchor="middle" dominant-baseline="central" fill="var(--d-teal-ink, #085041)">Next run reads it first</text>
+    <text class="s" x="340" y="258" text-anchor="middle" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">Same shape maps itself. Same question not re-asked</text>
+    <line x1="340" y1="276" x2="340" y2="304" marker-end="url(#ll-arrow)"/>
+    <rect x="170" y="310" width="340" height="56" rx="8" fill="var(--d-purple-bg, #EEEDFE)" stroke="var(--d-purple-line, #534AB7)" stroke-width="0.5"/>
+    <text class="h" x="340" y="328" text-anchor="middle" dominant-baseline="central" fill="var(--d-purple-ink, #3C3489)">lessons export → plugin pull request</text>
+    <text class="s" x="340" y="348" text-anchor="middle" dominant-baseline="central" fill="var(--d-purple-sub, #534AB7)">A developer reviews. Merged lessons reach every project ↻</text>
+  </g>
+</svg>

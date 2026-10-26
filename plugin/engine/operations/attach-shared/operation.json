@@ -1,0 +1,16 @@
+{
+  "name": "attach-shared",
+  "description": "Point one component on many pages at one shared datasource, adding the component where it is missing.",
+  "when": "The same content block must show on many pages from a single item (At a Glance on every article, Find Care on every location), or local copies of a block should be replaced by the shared item.",
+  "inputs": {
+    "pages": "page paths (or use root + template)",
+    "root": "walk pages under this item",
+    "template": "only pages of this template (name or id)",
+    "component": "catalog component key",
+    "shared": "{ path } of the shared item, or { parent, name, templateId, fields } to create it (first run creates it; run again to attach)",
+    "after": "catalog component key to insert after when the page does not have the component yet",
+    "replaceLocal": "true (default): repoint existing local copies to the shared item"
+  },
+  "version": 1,
+  "provenance": { "created": "2026-10-26", "from": "reference project: At a Glance on articles, Find Care local to shared" }
+}

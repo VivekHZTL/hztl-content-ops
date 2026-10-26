@@ -1,0 +1,18 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-10-20T10:00:00Z" },
+  "lists": "css",
+  "title": "Content Ops Session",
+  "cover": "c01-title",
+  "order": ["c01-title", "c02-no-manual", "c03-new-job", "c04-driver", "c05-knows", "c06-say-it", "c07-ask", "c08-mass", "c09-reports", "c10-rules", "c11-demo"],
+  "sections": {
+    "why": { "description": "What changes for you.", "start": "c01-title" },
+    "how": { "description": "What it knows and what you say to it.", "start": "c05-knows" },
+    "demo": { "description": "Rules of the road, then live.", "start": "c10-rules" }
+  },
+  "faces": {
+    "source-serif-4": { "family": "Source Serif 4", "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" },
+    "ibm-plex-sans": { "family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" }
+  },
+  "designSystems": []
+}

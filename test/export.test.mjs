@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { fakeCm, itemsFromSnapshot } from '../plugin/engine/lib/cm/fake.mjs';
+import { snapshotPage } from '../plugin/engine/lib/snapshot/page.mjs';
+import { exportPage } from '../plugin/engine/lib/ingest/sitecore.mjs';
+import { planPage } from '../plugin/engine/lib/plan/page-plan.mjs';
+import { DEFAULT_RULES, writeJson } from '../plugin/engine/lib/config/project.mjs';
+import { setupCommand } from '../plugin/engine/lib/cli/setup.mjs';
+import { exportCommand } from '../plugin/engine/lib/cli/export.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const snap0 = JSON.parse(fs.readFileSync(path.join(here, 'fixtures/page-snapshot.json'), 'utf8'));
+const xml = snap0.page.fields['__Final Renderings'].value;
+const device = xml.match(/<d\s[^>]*id="([^"]+)"/)[1];
+const rid = (ds) => xml.match(new RegExp(`s:ds="${ds}"[^>]*s:id="\\{([^}]+)\\}"`))[1].replace(/-/g, '').toLowerCase();
+const heroRid = xml.match(/s:id="\{([^}]+)\}"/)[1].replace(/-/g, '').toLowerCase();
+const ids = [...new Set([...xml.matchAll(/s:id="\{([^}]+)\}"/g)].map((m) => m[1].replace(/-/g, '').toLowerCase()))];
+const catalog = { v: 1, device, placeholders: { hero: xml.match(/s:ph="([^"]*hero[^"]*)"/)[1], main: xml.match(/s:ph="([^"]*main-content[^"]*)"/)[1] }, pageTypes: { singleLocation: { name: 'Single Location Page Template', templateId: snap0.page.templateId, fields: [{ name: 'pageTitle', type: 'Single-Line Text' }] } }, components: {} };
+for (const id of ids) catalog.components[`c_${id.slice(0, 6)}`] = { name: `Component ${id.slice(0, 6)}`, renderingId: id, ph: id === heroRid ? 'hero' : 'main', themed: false, params: '', fields: [], children: [], parent: null, childPh: null, dsTemplateId: 'c'.repeat(32) };
+const fsbsKey = `c_${rid('local:/Data/Feature Side by Side').slice(0, 6)}`;
+catalog.components[fsbsKey] = { ...catalog.components[fsbsKey], name: 'Feature Side by Side', fields: [{ name: 'heading', type: 'Single-Line Text' }, { name: 'imageDAM', type: 'Image' }] };
+const rules = DEFAULT_RULES;
+
+test('exportPage builds content from the snapshot that plans as up-to-date; shared components go to notes', async () => {
+  const cm = fakeCm({ items: itemsFromSnapshot(snap0) });
+  const snap = await snapshotPage(cm, snap0.page.id);
+  const c = exportPage({ snap, catalog, rules });
+  assert.equal(c.target.path, snap0.page.path); assert.equal(c.pageType, 'singleLocation');
+  const fsbs = c.components.find((x) => x.type === fsbsKey);
+  assert.ok(fsbs && fsbs.fields.imageDAM, 'exported the FSBS image value');
+  assert.ok(c.notes.some((n) => n.kind === 'shared'));
+  assert.equal(c.sources[0].file, `sitecore:${snap0.page.path}`);
+  assert.match(c.locators[`components.${c.components.indexOf(fsbs)}.fields.imageDAM`], /^sitecore:/);
+  const plan = planPage({ content: c, snap, catalog, rules, key: 'k' });
+  assert.equal(plan.status, 'up-to-date', JSON.stringify({ r: plan.reasons, ops: plan.ops && { c: plan.ops.creates.length, u: plan.ops.updates.map((u) => u.field), l: !!plan.ops.layout } }));
+});
+test('export command writes one work file per path', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cops-exp-'));
+  writeJson(path.join(projectDir, 'answers.json'), { name: 'd', siteRoot: '/sitecore/content/DemoSite/Demo', homePath: '/sitecore/content/DemoSite/Demo/Home', environments: [{ name: 'fake' }] });
+  await setupCommand(['--answers', path.join(projectDir, 'answers.json')], { projectDir, print: false });
+  writeJson(path.join(projectDir, '.content-ops', 'catalog.json'), catalog);
+  const cm = fakeCm({ items: itemsFromSnapshot(snap0), env: 'fake' });
+  const out = await exportCommand(['--env', 'fake', '--paths', snap0.page.path], { projectDir, cmFactory: () => cm, print: false });
+  assert.equal(out.written.length, 1);
+  assert.ok(fs.existsSync(path.join(projectDir, out.written[0])));
+});

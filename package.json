@@ -1,0 +1,27 @@
+{
+  "name": "@hztl/content-ops",
+  "version": "0.2.7",
+  "private": true,
+  "type": "module",
+  "description": "Sitecore XM Cloud content authoring engine: snapshot, plan, journaled apply, verify, undo, publish.",
+  "engines": { "node": ">=22" },
+  "bin": { "content-ops": "plugin/engine/bin/content-ops.mjs" },
+  "exports": {
+    "./client": "./plugin/engine/lib/client/authoring.mjs",
+    "./env": "./plugin/engine/lib/client/env.mjs",
+    "./cm": "./plugin/engine/lib/cm/adapter.mjs",
+    "./ids": "./plugin/engine/lib/cm/ids.mjs",
+    "./fake-cm": "./plugin/engine/lib/cm/fake.mjs",
+    "./snapshot": "./plugin/engine/lib/snapshot/page.mjs",
+    "./tenant": "./plugin/engine/lib/snapshot/tenant.mjs",
+    "./layout": "./plugin/engine/lib/layout/layout.mjs",
+    "./values": "./plugin/engine/lib/verify/values.mjs",
+    "./apply": "./plugin/engine/lib/apply/page.mjs",
+    "./apply-many": "./plugin/engine/lib/apply/many.mjs",
+    "./journal": "./plugin/engine/lib/apply/journal.mjs",
+    "./undo": "./plugin/engine/lib/apply/undo.mjs",
+    "./publish": "./plugin/engine/lib/publish/publish.mjs",
+    "./refs": "./plugin/engine/lib/refs/index.mjs"
+  },
+  "scripts": { "test": "node --test" }
+}

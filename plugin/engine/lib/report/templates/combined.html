@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>All runs</title><style>/*__CSS__*/</style></head><body><div class="wrap">
+<h1 id="title"></h1><p class="muted" id="sub"></p><div class="counts" id="counts"></div><section id="rows"></section><h2>Runs</h2><section id="runs"></section>
+<script type="application/json" id="data">/*__DATA__*/null</script>
+<script>
+const D=JSON.parse(document.getElementById('data').textContent);const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.title=D.title;document.getElementById('title').textContent=D.title;document.getElementById('sub').textContent=`Every page or item written on ${D.env}, one row each, latest result wins.`;
+document.getElementById('counts').innerHTML=Object.entries(D.counts).map(([k,v])=>`<div><b>${v}</b>${k}</div>`).join('');
+document.getElementById('rows').innerHTML=`<div class="tbl"><table><tr><th>Page</th><th>Latest status</th><th>Run</th><th>Apply</th><th>Note</th></tr>${D.rows.map(r=>`<tr><td>${esc(r.key)}<br><span class="muted">${esc(r.path||'')}</span></td><td><span class="pill ${esc(r.status)}">${esc(r.status)}</span>${r.manualRollback?' <span class="muted">(undone later)</span>':''}</td><td>${esc(r.runId)}</td><td>${esc(r.applyId)}</td><td>${esc(r.error||'')}</td></tr>`).join('')}</table></div>`;
+document.getElementById('runs').innerHTML=`<div class="tbl"><table><tr><th>Run</th><th>Created</th><th>Applies</th></tr>${D.runs.map(r=>`<tr><td>${esc(r.runId)}</td><td>${esc(r.createdAt||'')}</td><td>${r.applies.map(esc).join(', ')}</td></tr>`).join('')}</table></div>`;
+</script></div></body></html>

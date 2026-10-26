@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { loadLedger, lookup, record, saveLedger, annotateImages } from '../plugin/engine/lib/media/ledger.mjs';
+import { newContent } from '../plugin/engine/lib/content/schema.mjs';
+const d = fs.mkdtempSync(path.join(os.tmpdir(), 'cops-media-')); fs.mkdirSync(path.join(d, '.content-ops'));
+test.after(() => fs.rmSync(d, { recursive: true, force: true }));
+test('ledger records, looks up by url or hash, annotates content, round-trips', () => {
+  const l = loadLedger(d);
+  record(l, { legacyUrl: 'https://old.example.org/img/a.jpg', sha256: 'h1', name: 'a', envs: { dev: { itemId: 'x'.repeat(32) } }, usedBy: ['/p'] });
+  assert.equal(lookup(l, { legacyUrl: 'https://old.example.org/img/a.jpg' }).name, 'a');
+  assert.equal(lookup(l, { sha256: 'h1' }).name, 'a');
+  saveLedger(d, l);
+  assert.equal(loadLedger(d).entries.length, 1);
+  const c = newContent({ pageId: '1', pageType: 'x', targetPath: '/s/Home/p' });
+  c.components.push({ type: 'hero', fields: { image: { url: 'https://old.example.org/img/a.jpg', alt: 'A' }, image2: { url: 'https://old.example.org/img/b.jpg', alt: 'B' } }, children: [] });
+  const out = annotateImages(c, l, 'dev');
+  assert.equal(out.components[0].fields.image.itemId, 'x'.repeat(32));
+  assert.ok(out.flags.some((f) => f.kind === 'missing-image' && /b\.jpg/.test(f.text)));
+});

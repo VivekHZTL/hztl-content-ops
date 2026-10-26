@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 480" width="100%" role="img" aria-labelledby="t1 d1">
+  <title id="t1">Where Content Ops pieces live</title>
+  <desc id="d1">Claude Code plugin on top, project repo and credentials folder in the middle, Sitecore CM at the bottom.</desc>
+  <style>
+    .dg text { font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .dg .h { font-size: 14px; font-weight: 500; }
+    .dg .s { font-size: 12px; }
+    .dg line { stroke: var(--d-line, #888780); stroke-width: 1.5; }
+  </style>
+  <defs><marker id="wtl-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <g class="dg">
+    <rect x="40" y="40" width="600" height="56" rx="8" fill="var(--d-purple-bg, #EEEDFE)" stroke="var(--d-purple-line, #534AB7)" stroke-width="0.5"/>
+    <text class="h" x="340" y="58" text-anchor="middle" dominant-baseline="central" fill="var(--d-purple-ink, #3C3489)">Claude Code + Content Ops plugin</text>
+    <text class="s" x="340" y="78" text-anchor="middle" dominant-baseline="central" fill="var(--d-purple-sub, #534AB7)">You type plain English. Skills do the work. Every write asks first.</text>
+    <line x1="210" y1="96" x2="210" y2="150" marker-end="url(#wtl-arrow)"/>
+    <line x1="525" y1="96" x2="525" y2="150" marker-end="url(#wtl-arrow)"/>
+    <rect x="40" y="160" width="340" height="190" rx="20" fill="var(--d-teal-bg, #E1F5EE)" stroke="var(--d-teal-line, #0F6E56)" stroke-width="0.5"/>
+    <text class="h" x="60" y="184" dominant-baseline="central" fill="var(--d-teal-ink, #085041)">Your project repo</text>
+    <text class="s" x="60" y="214" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">.content-ops/project.json · site, envs, contacts</text>
+    <text class="s" x="60" y="240" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">catalog.json · page types, components, fields</text>
+    <text class="s" x="60" y="266" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">sources/ · the client files you dropped in</text>
+    <text class="s" x="60" y="292" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">work/ runs/ · plans, journals, reports</text>
+    <text class="s" x="60" y="318" dominant-baseline="central" fill="var(--d-teal-sub, #0F6E56)">knowledge/ · what this project taught the tool</text>
+    <rect x="410" y="160" width="230" height="190" rx="20" fill="var(--d-gray-bg, #F1EFE8)" stroke="var(--d-gray-line, #5F5E5A)" stroke-width="0.5"/>
+    <text class="h" x="430" y="184" dominant-baseline="central" fill="var(--d-gray-ink, #444441)">Your computer, outside repos</text>
+    <text class="s" x="430" y="214" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">~/.content-ops/&lt;project&gt;/</text>
+    <text class="s" x="430" y="240" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">dev.env · qa.env · prod.env</text>
+    <text class="s" x="430" y="266" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">one file per environment</text>
+    <text class="s" x="430" y="292" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">Never committed. Never read</text>
+    <text class="s" x="430" y="318" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">aloud by Claude.</text>
+    <line x1="340" y1="350" x2="340" y2="404" marker-end="url(#wtl-arrow)"/>
+    <rect x="190" y="414" width="300" height="56" rx="8" fill="var(--d-coral-bg, #FAECE7)" stroke="var(--d-coral-line, #993C1D)" stroke-width="0.5"/>
+    <text class="h" x="340" y="432" text-anchor="middle" dominant-baseline="central" fill="var(--d-coral-ink, #712B13)">Sitecore XM Cloud</text>
+    <text class="s" x="340" y="452" text-anchor="middle" dominant-baseline="central" fill="var(--d-coral-sub, #993C1D)">Authoring GraphQL · dev, qa, prod</text>
+  </g>
+</svg>
