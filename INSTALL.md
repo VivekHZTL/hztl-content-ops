@@ -4,13 +4,16 @@ One plugin per machine (the engine ships inside it). One `.content-ops/` folder 
 
 ## Once per machine (developer or author)
 
-1. Get the repo onto the machine (clone, or unzip a copy) and keep the folder; updates install from it. Node 22 or newer.
-2. Register the plugin with Claude Code, from the repo root:
+1. Claude Code, git and Node 22 or newer.
+2. Register the plugin from the public repo (no GitHub account needed):
 
    ```bash
-   claude plugin marketplace add /path/to/hztl-content-ops
+   claude plugin marketplace add VivekHZTL/hztl-content-ops
    claude plugin install sitecore-content-ops@hztl-content-ops
    ```
+
+   Offline or no git access: unzip a copy, then `claude plugin marketplace add ./` from inside that folder (keep it; updates install from it).
+   Working on the plugin itself: clone the repo and add the clone's path instead, so your edits are what you run.
 
 
 Restart Claude Code. In any folder, typing `/content-ops` or saying "content ops" now routes to the skills.
@@ -63,7 +66,7 @@ Same steps. Paths use your user folder (`C:\Users\<you>\.content-ops\…`). Clau
 
 ## Update the engine
 
-Pull or unzip the new version over the same folder, then run `claude plugin marketplace update hztl-content-ops` and `claude plugin update sitecore-content-ops@hztl-content-ops`, and restart Claude Code. The engine updates with the plugin. Run `npm test` in the repo if you want proof.
+Run `claude plugin marketplace update hztl-content-ops` and `claude plugin update sitecore-content-ops@hztl-content-ops`, and restart Claude Code. The engine updates with the plugin. Run `npm test` in the repo if you want proof.
 
 ## More
 

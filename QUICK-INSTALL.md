@@ -1,29 +1,28 @@
-Content Ops for Claude Code: setup in 5 minutes
+Content Ops for Claude Code: quick install (plain-text steps, paste anywhere)
 
 What it is: our Claude plugin for Sitecore content work. You talk to Claude in plain English inside the project folder; it reads your decks and sheets, plans the changes, writes them to Sitecore only after you say yes, verifies, and can undo. Works on any Sitecore XM Cloud project.
 
 Install (once per computer)
 
 Mac
-1. Unzip hztl-content-ops.zip. Move the folder somewhere permanent, e.g. your home folder, so you have ~/hztl-content-ops (keep it: updates install from it). Node 22+ needed (run "node -v" in Terminal; if missing, install from nodejs.org).
+1. Node 22+ needed (run "node -v" in Terminal; if missing, install from nodejs.org).
 2. Open Terminal (Spotlight, type Terminal). Paste these two lines, one at a time, Enter after each:
-   cd ~/hztl-content-ops
-   claude plugin marketplace add ./ && claude plugin install sitecore-content-ops@hztl-content-ops
+   claude plugin marketplace add VivekHZTL/hztl-content-ops
+   claude plugin install sitecore-content-ops@hztl-content-ops
 3. Quit Claude Code fully (Cmd+Q) and open it again. Check: in Terminal paste
    claude plugin list
    You should see sitecore-content-ops with Status: enabled.
 
 Windows
 1. Install Git for Windows if you do not have it (gitforwindows.org, defaults). Claude Code needs it. Node 22+ needed too (nodejs.org).
-2. Unzip hztl-content-ops.zip. Move the folder to C:\Users\<you>\hztl-content-ops.
-3. Open "Git Bash" from the Start menu (not PowerShell). Paste, Enter after each:
-   cd ~/hztl-content-ops
-   claude plugin marketplace add ./ && claude plugin install sitecore-content-ops@hztl-content-ops
-4. Close Claude Code fully and open it again. Check: in Git Bash paste
+2. Open "Git Bash" from the Start menu (not PowerShell). Paste, Enter after each:
+   claude plugin marketplace add VivekHZTL/hztl-content-ops
+   claude plugin install sitecore-content-ops@hztl-content-ops
+3. Close Claude Code fully and open it again. Check: in Git Bash paste
    claude plugin list
    You should see sitecore-content-ops with Status: enabled.
 
-Where things end up: the plugin, engine included, in Claude Code's plugin folder (installed from the folder you chose); credentials later in ~/.content-ops/<project>/ (Mac) or C:\Users\<you>\.content-ops\<project>\ (Windows). Neither is inside any project folder.
+Where things end up: the plugin, engine included, in Claude Code's plugin folder (installed from the public GitHub repo, no account needed); credentials later in ~/.content-ops/<project>/ (Mac) or C:\Users\<you>\.content-ops\<project>\ (Windows). Neither is inside any project folder.
 
 Set up a project (once per project, a developer, 10 minutes)
 Open the project repo in Claude Code and say:
@@ -46,4 +45,4 @@ Rules
 - Never paste keys, passwords or client secrets into chat.
 
 More projects: install once, set up each project once. Nothing from one project leaks into another.
-Questions: the one-page guide is plugin/ROLLOUT.md in the zip, or ask Claude "who do I ask on this project".
+Questions: the one-page guide is plugin/ROLLOUT.md in the repo, or ask Claude "who do I ask on this project".

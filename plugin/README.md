@@ -7,10 +7,10 @@ read-only subagents, two slash commands, and hooks that keep authors inside the 
 
 ## Install
 
-From this repo (it is its own marketplace):
+From the public repo (it is its own marketplace):
 
 ```bash
-claude plugin marketplace add /path/to/hztl-content-ops   # or the git URL
+claude plugin marketplace add VivekHZTL/hztl-content-ops   # or a local clone's path when developing the plugin
 claude plugin install sitecore-content-ops@hztl-content-ops
 ```
 
