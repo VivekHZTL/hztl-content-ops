@@ -1,9 +1,9 @@
 {
   "name": "sitecore-content-ops",
   "displayName": "Sitecore Content Ops",
-  "version": "0.2.7",
-  "description": "A harness for Sitecore XM Cloud content work: Claude builds whatever a task needs (pages from decks and sheets, shared datasources, Data records, page swaps, clean-ups) and every write goes through one governed engine: dry run, confirm, journal, read-back, undo, separate publish. Ships with playbooks from a large production project.",
+  "version": "0.2.8",
+  "description": "A harness for SitecoreAI content work: Claude builds whatever a task needs (pages from decks and sheets, shared datasources, Data records, page swaps, clean-ups) and every write goes through one governed engine: dry run, confirm, journal, read-back, undo, separate publish. Ships with playbooks from a large production project.",
   "author": { "name": "HZTL" },
   "license": "UNLICENSED",
-  "keywords": ["sitecore", "xm-cloud", "content", "migration", "authoring"]
+  "keywords": ["sitecore", "sitecoreai", "content", "migration", "authoring"]
 }

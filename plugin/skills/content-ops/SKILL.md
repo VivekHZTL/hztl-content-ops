@@ -1,6 +1,6 @@
 ---
 name: content-ops
-description: Sitecore XM Cloud content authoring with the content-ops engine. Use whenever someone asks to check, set up, register sources, intake, map, plan, dry run, rehearse, apply, write, create pages, verify, review, publish, undo, live-check, or get strategy suggestions for Sitecore pages built from decks, workbooks, legacy sites or lists. Routes to the role skills (content-ops-setup, -sources, -intake, -map, -plan, -apply, -verify, -review, -strategist, -inspect-code, -build, sync-repo) and holds the ground rules every one of them follows. Works for content authors with no technical background and for the tech team.
+description: SitecoreAI content authoring with the content-ops engine. Use whenever someone asks to check, set up, register sources, intake, map, plan, dry run, rehearse, apply, write, create pages, verify, review, publish, undo, live-check, or get strategy suggestions for Sitecore pages built from decks, workbooks, legacy sites or lists. Routes to the role skills (content-ops-setup, -sources, -intake, -map, -plan, -apply, -verify, -review, -strategist, -inspect-code, -build, sync-repo) and holds the ground rules every one of them follows. Works for content authors with no technical background and for the tech team.
 ---
 
 # Content ops

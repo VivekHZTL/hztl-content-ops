@@ -14,7 +14,11 @@ several revisions; rows keyed by slug, with new slugs replacing old ones; per-ta
    (`rename` op), keeping the item id.
 4. Values that name things (amenities, services, states) must become item ids: build the lookup from Sitecore in
    the operation, and flag names that match nothing.
-5. Several tabs with different shapes: one profile per tab, or a project operation that reads each tab.
+5. Loose values that map to several fields: "Mon–Fri, 9 am–5 pm" is a from and to time per day (14 fields, plus
+   all-day and closed flags) on a typical location template; phone numbers need one format. Write the mapping once as
+   a project rule or operation, show the split in the dry run, and flag anything ambiguous ("by appointment",
+   "varies") instead of guessing.
+6. Several tabs with different shapes: one profile per tab, or a project operation that reads each tab.
 
 **Pitfalls**
 - A column shifted on one tab breaks every row silently; check headers per tab.

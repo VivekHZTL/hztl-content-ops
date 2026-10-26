@@ -2,7 +2,7 @@
 
 **Installing or rolling out?** Read [INSTALL.md](INSTALL.md) (machine once, project once, many projects) and [plugin/ROLLOUT.md](plugin/ROLLOUT.md).
 
-The engine behind HZTL's Sitecore XM Cloud content authoring tool: read-only snapshots and fingerprints, a
+The engine behind HZTL's SitecoreAI content authoring tool: read-only snapshots and fingerprints, a
 catalog-driven layout toolkit, a journaled apply with read-back and automatic rollback, bounded apply-many,
 manual undo, a guarded publish runner, a tenant scan with a reference index, and a `check` command.
 No runtime dependencies. Node 22 or newer.

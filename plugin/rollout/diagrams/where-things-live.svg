@@ -30,7 +30,7 @@
     <text class="s" x="430" y="318" dominant-baseline="central" fill="var(--d-gray-sub, #5F5E5A)">aloud by Claude.</text>
     <line x1="340" y1="350" x2="340" y2="404" marker-end="url(#wtl-arrow)"/>
     <rect x="190" y="414" width="300" height="56" rx="8" fill="var(--d-coral-bg, #FAECE7)" stroke="var(--d-coral-line, #993C1D)" stroke-width="0.5"/>
-    <text class="h" x="340" y="432" text-anchor="middle" dominant-baseline="central" fill="var(--d-coral-ink, #712B13)">Sitecore XM Cloud</text>
+    <text class="h" x="340" y="432" text-anchor="middle" dominant-baseline="central" fill="var(--d-coral-ink, #712B13)">SitecoreAI</text>
     <text class="s" x="340" y="452" text-anchor="middle" dominant-baseline="central" fill="var(--d-coral-sub, #993C1D)">Authoring GraphQL · dev, qa, prod</text>
   </g>
 </svg>

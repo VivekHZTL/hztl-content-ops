@@ -1,9 +1,9 @@
 {
   "name": "@hztl/content-ops",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "type": "module",
-  "description": "Sitecore XM Cloud content authoring engine: snapshot, plan, journaled apply, verify, undo, publish.",
+  "description": "SitecoreAI content authoring engine: snapshot, plan, journaled apply, verify, undo, publish.",
   "engines": { "node": ">=22" },
   "bin": { "content-ops": "plugin/engine/bin/content-ops.mjs" },
   "exports": {

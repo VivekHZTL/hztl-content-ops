@@ -1,10 +1,10 @@
 # Content Ops
 
-Content Ops lets a content team author Sitecore XM Cloud pages from the files clients send, with every write planned first, journaled, verified and undoable. A developer sets a project up once in about ten minutes. After that, authors do everything in plain English inside Claude Code, and the tool never writes to Sitecore without an explicit yes.
+Content Ops lets a content team author SitecoreAI pages from the files clients send, with every write planned first, journaled, verified and undoable. A developer sets a project up once in about ten minutes. After that, authors do everything in plain English inside Claude Code, and the tool never writes to Sitecore without an explicit yes.
 
 | | Content Ops framework | Everyday Claude for Sitecore |
 |---|---|---|
-| What | Engine plus plugin any Sitecore XM Cloud project drops in | Authors use Claude Code for day-to-day admin, analysis, fixes and reports |
+| What | Engine plus plugin any SitecoreAI project drops in | Authors use Claude Code for day-to-day admin, analysis, fixes and reports |
 | Who sets up | A developer, once per project | Nobody. The plugin plus a credentials file |
 | Who uses | Authors through skills, developers through the CLI | Authors, in plain English |
 | What changes | Bulk authoring without copy and paste | From typist to verifier, consultant and strategist |

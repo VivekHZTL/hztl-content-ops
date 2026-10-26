@@ -3,12 +3,12 @@
   "owner": {
     "name": "HZTL"
   },
-  "description": "HZTL plugins for Claude Code: Sitecore XM Cloud content operations.",
+  "description": "HZTL plugins for Claude Code: SitecoreAI content operations.",
   "plugins": [
     {
       "name": "sitecore-content-ops",
       "source": "./plugin",
-      "description": "A harness for Sitecore XM Cloud content work: Claude builds what each task needs, and every write is planned, confirmed, journaled, read back, undoable and published separately. Ships with playbooks from a large production project."
+      "description": "A harness for SitecoreAI content work: Claude builds what each task needs, and every write is planned, confirmed, journaled, read back, undoable and published separately. Ships with playbooks from a large production project."
     }
   ]
 }

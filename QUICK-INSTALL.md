@@ -1,6 +1,6 @@
 Content Ops for Claude Code: quick install (plain-text steps, paste anywhere)
 
-What it is: our Claude plugin for Sitecore content work. You talk to Claude in plain English inside the project folder; it reads your decks and sheets, plans the changes, writes them to Sitecore only after you say yes, verifies, and can undo. Works on any Sitecore XM Cloud project.
+What it is: our Claude plugin for Sitecore content work. You talk to Claude in plain English inside the project folder; it reads your decks and sheets, plans the changes, writes them to Sitecore only after you say yes, verifies, and can undo. Works on any SitecoreAI project.
 
 Install (once per computer)
 

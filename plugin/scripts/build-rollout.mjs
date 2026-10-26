@@ -141,7 +141,7 @@ export function buildRollout({ pluginDir }) {
   const { html, headings } = renderMarkdown(md, { diagrams });
   const body = html.replace(/<h1 id="[^"]+">([^<]+)<\/h1>\n<p>/, (m, t) => `<h1 id="${slug(t)}">${t}</h1>\n<p class="lede">`);
   const page = `<title>Content Ops</title>
-<meta name="description" content="How to set up and use Content Ops on any Sitecore XM Cloud project">
+<meta name="description" content="How to set up and use Content Ops on any SitecoreAI project">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Serif:wght@500&family=IBM+Plex+Mono&display=swap">
 <style>${CSS}</style>
 <div class="wrap">
