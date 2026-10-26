@@ -11,4 +11,4 @@ Bring to the session: your laptop with the app installed, and nothing else. Your
 Do: try step 3 twice, with two different sentences.
 Don't: install anything else or set up any connection. The session covers that.
 
-What to do next: the session itself. Afterwards, the take-home card and the rollout page. The deeper material under `reference/` is for later, if you want it.
+What to do next: the session itself. Afterwards, the take-home card and the one-page guide (`ROLLOUT.md`). The deeper material under `reference/` is for later, if you want it.

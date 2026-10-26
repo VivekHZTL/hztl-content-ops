@@ -1,112 +1,120 @@
-# Content Ops
+# Content Ops: the one-page guide
 
-Content Ops lets a content team author SitecoreAI pages from the files clients send, with every write planned first, journaled, verified and undoable. A developer sets a project up once in about ten minutes. After that, authors do everything in plain English inside Claude Code, and the tool never writes to Sitecore without an explicit yes.
+Content Ops is a Claude Code plugin for SitecoreAI content work. You talk to Claude in plain English inside the project folder. Claude reads copy decks, workbooks and legacy pages, plans the changes, writes them to Sitecore only after you say yes, verifies them, and can undo them.
 
-| | Content Ops framework | Everyday Claude for Sitecore |
-|---|---|---|
-| What | Engine plus plugin any SitecoreAI project drops in | Authors use Claude Code for day-to-day admin, analysis, fixes and reports |
-| Who sets up | A developer, once per project | Nobody. The plugin plus a credentials file |
-| Who uses | Authors through skills, developers through the CLI | Authors, in plain English |
-| What changes | Bulk authoring without copy and paste | From typist to verifier, consultant and strategist |
+It isn't a fixed tool with a feature list. It's a harness your Claude uses on your project:
+
+- **Governance:** every write is planned, confirmed, journaled, read back, undoable, and published as a separate step.
+- **Guidance:** understand the ask, look at the real items, pilot one page, scale, and keep what was built so the next person can reuse it.
+- **Knowledge:** playbooks from a large production project (`plugin/knowledge/playbooks/`), so a new project doesn't start from zero.
+
+When a task needs something no command does, Claude builds it as an *operation*, and the same gates apply.
+
+## Get started in six steps
+
+You need Claude Code, git, and Node 22 or newer. The repo is public, so you don't need a GitHub account.
+
+1. **Install the plugin**, once per computer:
+   ```
+   claude plugin marketplace add VivekHZTL/hztl-content-ops
+   claude plugin install sitecore-content-ops@hztl-content-ops
+   ```
+   Quit Claude Code fully and reopen it.
+2. **Get the project repo.** Clone it or download it, then open the folder in Claude Code.
+3. **Set up Content Ops for the project.** Say **"set up content ops for this project"**. If the project is already set up, Claude reuses the team's settings and creates `~/.content-ops/<project>/` with an empty file per environment.
+4. **Add your credentials.** Open `~/.content-ops/<project>/dev.env` in a text editor. Paste the Sitecore host, client id and client secret after the `=` signs, and save. The Experience Edge context id is optional. Never paste these into chat.
+5. **Check the connection.** Say **"check the connection"**. Expect `credentials: ok` and `connection: ok`.
+6. **Done.** Ask in plain English. Every write still asks you first.
+
+Windows: install Git for Windows and run step 1 in Git Bash, not PowerShell. These steps are written but not yet tested by the team.
+
+To update later: `claude plugin marketplace update hztl-content-ops`, then `claude plugin update sitecore-content-ops@hztl-content-ops`.
+
+## Setting up a new project (a developer, once)
+
+A project needs this once, before step 3 works for everyone else. Open the project repo in Claude Code and say:
+
+1. **"set up content ops here"**. Claude asks for the site root, home path, environments and who to ask, then writes `.content-ops/`.
+2. **"copy the credentials from my .env.local for dev"**. Three settings move to `~/.content-ops/<project>/dev.env` (mode 600, never shown). Repeat for qa. Production only on purpose, with `--prod`.
+3. **"check the connection"**.
+4. **"build the catalog"**. This reads page types, components and fields from real pages on the site. A `Home/_blueprints` folder (one page per template with every allowed component) makes it complete on day one, but it's optional.
+5. Add `sources/`, `work/` and `runs/` (at the repo root) to `.gitignore`, and commit `.content-ops/` through a pull request.
 
 ## Where things live
 
-<!-- diagram: where-things-live -->
 ![Where things live](rollout/diagrams/where-things-live.svg)
 
-The plugin runs inside Claude Code. The project repo holds the configuration, the catalog of page types and components, the client files, the plans and the journals. Credentials live on your computer outside every repo and are never printed. Sitecore is reached through its Authoring GraphQL API, one environment at a time.
-
-## Ten minutes to first read (developer)
-
-1. In Claude Code, open the project folder and say **"set up content ops here"**. The setup skill asks a few questions (site root, home path, environment names, who to ask) and runs `content-ops setup --answers <file>`. You get a `.content-ops/` folder with `project.json` and an empty `knowledge/` folder.
-2. Say **"copy the credentials from my .env.local for dev"**. Claude runs `content-ops setup --from-env-local <path> --env dev`. Three settings move to `~/.content-ops/<project>/dev.env` with mode 600. Claude never shows them. Expected output: the host and the first four characters of the client id.
-3. Say **"check the connection"**. Claude runs `content-ops check --project <name> --env dev`. Expected: `credentials: ok`, `connection: ok`.
-4. Say **"build the catalog"**. Claude runs `content-ops catalog build --env dev`. With no blueprint folder it picks one real page per page template from the site (the one using the most components) and reads page types, components and fields from those. Expected: a list of page types, a component count, no errors. Optional: a `Home/_blueprints` folder with one page per template carrying every allowed component gives a complete catalog on day one. Later changes use `content-ops catalog refresh --env dev`, which never deletes.
-5. Commit `.content-ops/` so authors get it. Add `sources/`, `work/` and `runs/` to `.gitignore`.
-
-## Five minutes to join a project that is already set up (anyone)
-
-1. Get the project repo (clone, pull or unzip) and open it in Claude Code. Say **"set up content ops for this project"**.
-2. Claude sees `.content-ops/` is there, so it does not ask the setup questions. It runs `content-ops setup join`: `~/.content-ops/<project>/` is created with an empty `<env>.env` for each non-production environment, and you get a short list of what is still missing.
-3. Open the placeholder file in a text editor, paste the three values a developer gives you after the `=` signs, and save. Never paste them into chat.
-4. Say **"check the connection"**. Expected: `credentials: ok`, `connection: ok`.
-
-## Ten minutes to first safe write (author)
-
-1. Open the project folder in Claude Code. Production is reachable only with a production credentials file, and then every write says PRODUCTION and asks.
-2. Say **"what page types and components do we have?"** Claude reads the catalog. No Sitecore call, no write.
-3. Say **"make me an intake sheet for Location pages"**. Claude runs `content-ops template --page-type <key>` and hands you a spreadsheet whose columns are exactly the fields Sitecore has. This is the format you give clients.
-4. Fill two rows with dummy content, drop the file in `sources/`, and say **"plan it"**. Claude runs intake and `content-ops plan --env dev --content work/`. You get a dry-run report. Nothing was written.
-5. Say **"apply this on dev"**. Claude restates the environment, the host, prod yes or no, and the page count, then asks. Say yes in your own words. Claude runs `content-ops apply --run <id> --confirm dev`.
-6. Say **"verify"**. Claude re-plans the written pages. Expected: every page `up-to-date`.
-7. Say **"undo that"**. Claude restores the page from its journal and asks first.
+The plugin, with the engine inside it, runs in Claude Code. The project repo holds the configuration, the catalog, the operations and the project's lessons. Client files, plans and journals stay in the git-ignored `sources/`, `work/` and `runs/` folders. Credentials live on your computer, outside every repo, and are never printed. Sitecore is reached through its Authoring GraphQL API, one environment at a time.
 
 ## The daily loop
 
-<!-- diagram: daily-loop -->
 ![The daily loop](rollout/diagrams/daily-loop.svg)
 
-Sources become content JSON with flags for anything unsure. The plan is a promise you can read. Apply is the act, journaled and read back. Verify proves it. Publish is always its own ask.
+Sources become content JSON, with flags for anything unclear. The plan is a dry run you can read. Apply asks first, writes, keeps a journal and reads everything back. Verify proves the result. Publish is always its own ask.
 
-## Who can do what
-
-There are no roles to set. Everyone gets the same gates; what you can reach depends on the credentials files a developer gives you.
-
-| | Everyone |
+| Say | What happens |
 |---|---|
-| Can | read, intake, plan, apply with a yes, verify, undo, reports, lessons; setup and catalog are usually done by a developer |
-| Refused | anything without `--confirm`; production writes without a production credentials file; Sitecore serialization push |
-| Asks first | every Sitecore write, credentials copy, and any recursive delete |
-| Credentials | `dev.env` and `qa.env`; `prod.env` only when the project lead gives it |
+| what page types do we have? | Reads the catalog. No Sitecore call. |
+| make me an intake sheet for Service pages | A spreadsheet whose columns are exactly the Sitecore fields, to give to the client. |
+| plan it | Intake and a dry run, plus a report. Nothing is written. |
+| apply this on dev | Restates the environment and page count, asks, writes, reads back. |
+| verify | Re-checks what was written. Expect everything to be up to date. |
+| publish | Asks separately, publishes, then checks the live site. |
+| undo the <slug> page on dev | Restores that page from its journal. |
+| which pages have an empty SEO title? give me a report | A read-only report. |
+| clean up the old Data folders | Reference scan first. Deletes go to the recycle bin and can be undone. |
+| put the same block on every article from one shared item | Claude uses the `attach-shared` operation, shows the dry run, then applies with the usual gates. |
+
+## When a task needs something new
+
+Shared datasources, records under Data, swapping a page's content, repointing references, redirects: Claude builds these as **operations** in `.content-ops/operations/<name>/`.
+
+- An operation only reads Sitecore and proposes changes. Every write method it could call throws.
+- The engine plans those changes, records the before-state itself, and `apply` writes them with the same confirmation, journal, read-back, auto-rollback and undo as everything else.
+- Operations are committed with the project, so the next person reuses them. A general one is promoted into the plugin.
+- Two come built in: `set-field` (one field on many items) and `attach-shared` (one shared datasource on many pages).
+
+Commands: `content-ops op list`, `op show <name>`, `op new <name>`, `op plan <name> --env <env>`.
 
 ## Safety in one screen
 
-1. Every Sitecore write asks first and restates environment, host, prod yes or no, and scope.
+1. Every Sitecore write asks first and restates the environment, host, production yes or no, and scope.
 2. Production needs a production credentials file. With it, every production write is announced as PRODUCTION and asks again.
-3. Every write is journaled before it happens, read back after, and rolled back on mismatch.
-4. Undo is one command per page from the journal. Say "undo that" after any apply.
-5. Shared datasources are never edited. Unknown components are refused.
-6. Client copy is never corrected. Problems become flags with a locator.
-7. Credentials are never printed, read aloud or committed.
+3. Every write is journaled before it happens, read back after, and rolled back on a mismatch.
+4. Undo is one command per page or change set, from the journal.
+5. The page planner never edits a shared datasource through a page, and refuses unknown components. Shared items are changed only by an operation, on purpose, under the same gates.
+6. Client copy is never corrected silently. Problems become flags with a locator.
+7. Credentials are never printed or committed, and the engine refuses a credentials file inside a git folder.
 8. Publish is a separate ask. Nothing publishes as a side effect.
+9. Sitecore serialization push is blocked, and recursive deletes ask first.
 
 ## How it learns
 
-<!-- diagram: learning-loop -->
 ![How it learns](rollout/diagrams/learning-loop.svg)
 
-Every confirmed sheet shape, deck shape and rule override is remembered in `.content-ops/knowledge/` with where it came from. The same shape never asks twice. Lessons are plain words, appended, never rewritten. `content-ops lessons export` bundles the shareable ones so a developer can open a pull request against the plugin. Nothing changes the shared plugin by itself.
-
-When a task needs something new (a shared datasource, records under Data, a page swap, repointing references), Claude builds it as an **operation** in `.content-ops/operations/`. The operation only reads and proposes changes; the engine writes them with the same dry run, confirmation, journal, read-back and undo as everything else. The operation is committed with the project, so the next person reuses it, and a general one is promoted into the plugin. The plugin starts with playbooks from the reference project, so it already knows how those cases were solved.
-
-## Using it without content work
-
-Even a project with no migration gets three things. The catalog is living documentation of page types, components and fields, rebuilt from the blueprint pages. `content-ops export` and `content-ops scan` turn existing pages into readable files and reference maps for audits. `content-ops template` gives clients a standard sheet to fill before any content arrives.
+Every confirmed sheet shape, deck shape and rule override is remembered in `.content-ops/knowledge/`, with where it came from, so the same shape never asks twice. Lessons are plain words, appended, never rewritten. Operations hold the procedures. `content-ops lessons export` bundles the shareable lessons so a developer can open a pull request against the plugin. Nothing changes the shared plugin by itself.
 
 ## FAQ
 
-**It asked me to confirm. What do I check?** The environment name, the host, prod yes or no, and the page count. If any of those surprise you, say no.
+**It asked me to confirm. What do I check?** The environment name, the host, production yes or no, and the page count. If any of those surprise you, say no.
 
 **It says needs-review. Is that bad?** No. It means the tool refused to guess. Read the reasons, fix the source or the catalog, and plan again.
 
-**Can I break prod?** Only if you have the production credentials file and say yes to a prompt that says PRODUCTION. Without the file, nothing reaches it.
+**Can I break production?** Only if you have the production credentials file and say yes to a prompt that says PRODUCTION.
 
 **The client sent a sheet in their own format.** Drop it in `sources/` and run intake. The tool proposes a mapping once, you confirm it, and the same shape never asks again.
 
-**What does pending mean on a report?** Something was held, not written: a placeholder token, a link to a page that does not exist yet, a component changed on the blueprint. Each line says why.
-
-**How do I see what happened last week?** `content-ops history --env dev` lists every page written from the journals. `content-ops report --combined --env dev` makes one page you can share.
+**How do I see what happened last week?** `content-ops history --env dev` lists everything written, from the journals. `content-ops report --combined --env dev` makes one page you can share.
 
 **It wrote the wrong thing.** Say "undo that page". The journal holds the exact previous values.
 
-**Can I publish?** Only as its own ask, after verify, and never as part of apply.
+**Several projects?** Install once. Each project has its own `.content-ops/` and its own credentials folder, and nothing crosses between them.
 
-**Where are the secrets?** In `~/.content-ops/<project>/<env>.env` on your computer, outside every repo. Claude does not read them.
+**Who do I ask?** `contacts` in `.content-ops/project.json` names the developer and the content lead for the project.
 
-**Who do I ask?** `contacts` in `.content-ops/project.json` names the developer and the content lead for this project.
+## More
 
-## Links
-
-- Plugin: the `plugin/` folder of the content-ops engine repo. Install it in Claude Code from the repo's marketplace.
-- Training hub: the kickoff deck and the session guide, from your project lead.
-- For developers: the engine design spec and this phase's plan live in `docs/superpowers/` of the project that commissioned the tool.
+- [INSTALL.md](../INSTALL.md): install details, many projects, updating.
+- [Playbooks](knowledge/playbooks/README.md): how the common hard cases were solved.
+- [Training](training/README.md): a 90-minute session plan for a content team.
+- Feedback and feature requests: open an issue on the repo.

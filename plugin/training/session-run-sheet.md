@@ -2,7 +2,7 @@
 
 One trainer, up to eight authors, each on their own laptop with the kit or their own project folder open in Claude Code. Dev or qa credentials only, handed out in person. Prod is never in the room.
 
-Before the room fills: `content-ops check --project <name> --env dev` on your own machine must say `connection: ok`. Have the rollout page and the deck open. Have the catalog built and committed in the kit project (`content-ops catalog build --env dev`; blueprints optional).
+Before the room fills: `content-ops check --project <name> --env dev` on your own machine must say `connection: ok`. Have the one-page guide (`ROLLOUT.md`) and the deck open. Have the catalog built and committed in the kit project (`content-ops catalog build --env dev`; blueprints optional).
 
 Every block below has the same shape: what you type, what the room watches for, what to do if the output differs, one Do, one Don't, and the slide numbers.
 
@@ -90,7 +90,7 @@ Expected: the room can point at a flag, a needs-review reason and an "I am not s
 If it differs: someone cannot tell a flag from an error; go back to block 4's report and read one flag line together.
 Point at: a flag (what the client must answer), a `needs-review` reason (what the tool refused), a line where Claude says it is not sure.
 Say: your job from tomorrow is to read these, decide, and ask good questions. The typing is done.
-Do: hand out the take-home card and the rollout page link.
+Do: hand out the take-home card and the one-page guide (`ROLLOUT.md`).
 Don't: end with a list of commands. End on the three rules and the driver’s-seat line.
 Slides: 10–11 (three rules, let’s see it).
 

@@ -1,4 +1,4 @@
-> Deeper material. Start with `00-before-the-session.md`, the live session, and the rollout page.
+> Deeper material. Start with `00-before-the-session.md`, the live session, and the one-page guide (`ROLLOUT.md`).
 
 # Level 4: writes on the practice copy (4 hours)
 

@@ -1,6 +1,6 @@
 # sitecore-content-ops plugin
 
-**Start here:** [ROLLOUT.md](ROLLOUT.md) is the one page a colleague reads before touching anything (what this is, where things live, ten minutes to first read, ten minutes to first safe write, roles, safety, how it learns, FAQ). The same page as a shareable artifact: https://claude.ai/artifact/K37VPs6Y6PohRvyvXn3zJD (private until shared). It is built from ROLLOUT.md by `node plugin/scripts/build-rollout.mjs`; a test keeps the two in step.
+**Start here:** [ROLLOUT.md](ROLLOUT.md) is the one page a colleague reads before touching anything: what this is, the six steps to get started, setting up a new project, the daily loop, operations, safety, how it learns, and the FAQ.
 
 The author-facing part of `@hztl/content-ops`: skills that drive the engine CLI in plain words, two
 read-only subagents, two slash commands, and hooks that keep authors inside the rules.

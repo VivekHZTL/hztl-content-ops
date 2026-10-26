@@ -119,7 +119,7 @@ Intake details: on the first run `work/profile.proposed.json` is a map keyed by 
 
 ## Plugin
 
-Rollout guide for colleagues: `plugin/ROLLOUT.md` (source) and `plugin/rollout/index.html` (built by `node plugin/scripts/build-rollout.mjs`), published at https://claude.ai/artifact/K37VPs6Y6PohRvyvXn3zJD.
+Rollout guide for colleagues: [`plugin/ROLLOUT.md`](plugin/ROLLOUT.md).
 
 The author-facing plugin lives in `plugin/` and this repo is its marketplace (`.claude-plugin/marketplace.json`):
 

@@ -113,7 +113,9 @@ test('F1: new skills exist; the router mentions lessons, template, mappings and 
   for (const w of ['lessons list', 'content-ops-template', 'content-ops-lessons', 'contacts']) assert.match(router, new RegExp(w));
   assert.doesNotMatch(router, /\.content-ops\/learnings/);
   assert.match(read(path.join(plugin, 'README.md')), /ROLLOUT\.md/);
-  assert.ok(fs.existsSync(path.join(plugin, 'rollout/index.html')), 'built rollout page');
+  const guide = read(path.join(plugin, 'ROLLOUT.md'));
+  assert.match(guide, /claude plugin marketplace add /); assert.match(guide, /set up content ops for this project/);
+  for (const d of ['where-things-live', 'daily-loop', 'learning-loop']) assert.ok(fs.existsSync(path.join(plugin, 'rollout/diagrams', `${d}.svg`)) && guide.includes(`rollout/diagrams/${d}.svg`), d);
   const setup = read(path.join(plugin, 'skills/content-ops-setup/SKILL.md'));
   assert.match(setup, /--from-env-local/); assert.match(setup, /catalog refresh/);
   for (const f of walk(plugin, /\.md$/)) { const s = read(f); assert.doesNotMatch(s, /training level 5/, f); }
