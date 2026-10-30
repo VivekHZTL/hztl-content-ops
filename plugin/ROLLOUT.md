@@ -10,9 +10,9 @@ It isn't a fixed tool with a feature list. It's a harness your Claude uses on yo
 
 When a task needs something no command does, Claude builds it as an *operation*, and the same gates apply.
 
-## Get started in six steps
+## Get started
 
-You need Claude Code, git, and Node 22 or newer. The repo is public, so you don't need a GitHub account.
+You need Claude Code and Node 22 or newer (on Windows, Git for Windows too; Claude Code uses its Git Bash). The repo is public, so you don't need a GitHub account. You don't need the project's code.
 
 1. **Install the plugin**, once per computer:
    ```
@@ -20,31 +20,30 @@ You need Claude Code, git, and Node 22 or newer. The repo is public, so you don'
    claude plugin install sitecore-content-ops@hztl-content-ops
    ```
    Quit Claude Code fully and reopen it.
-2. **Get the project repo.** Clone it or download it, then open the folder in Claude Code.
-3. **Set up Content Ops for the project.** Say **"set up content ops for this project"**. If the project is already set up, Claude reuses the team's settings and creates `~/.content-ops/<project>/` with an empty file per environment.
-4. **Add your credentials.** Open `~/.content-ops/<project>/dev.env` in a text editor. Paste the Sitecore host, client id and client secret after the `=` signs, and save. The Experience Edge context id is optional. Never paste these into chat.
-5. **Check the connection.** Say **"check the connection"**. Expect `credentials: ok` and `connection: ok`.
-6. **Done.** Ask in plain English. Every write still asks you first.
+2. **Open a folder for the project.** The project repo if you have it, otherwise any folder (for example `Documents\<project>`). Open it in Claude Code.
+3. **Say "set me up to connect on dev"** (or qa, or prod). Claude makes an empty key file at `~/.content-ops/<project>/<env>.env` (Windows: `C:\Users\<you>\.content-ops\<project>\<env>.env`) and tells you where it is.
+4. **Fill the key file.** Open it in a text editor (Notepad on Windows). Paste the Sitecore host, client id and client secret after the `=` signs, and save. The Experience Edge context id is optional. Never paste these into chat.
+5. **Say "done" or "check the connection".** Claude signs in, reads the site's home page and tells you what it found. That's the whole setup.
+6. **Ask for what you came to do**, in plain English. Every write still asks you first.
 
-Windows: install Git for Windows and run step 1 in Git Bash, not PowerShell. These steps are written but not yet tested by the team.
+There is nothing else to set up. Page types and components (the "catalog") are read from the site the first time a task needs them.
 
 To update later: `claude plugin marketplace update hztl-content-ops`, then `claude plugin update sitecore-content-ops@hztl-content-ops`.
 
-## Setting up a new project (a developer, once)
+## Optional, for the tech team
 
-A project needs this once, before step 3 works for everyone else. Open the project repo in Claude Code and say:
+None of this is needed before anyone can work.
 
-1. **"set up content ops here"**. Claude asks for the site root, home path, environments and who to ask, then writes `.content-ops/`.
-2. **"copy the credentials from my .env.local for dev"**. Three settings move to `~/.content-ops/<project>/dev.env` (mode 600, never shown). Repeat for qa. Production only on purpose, with `--prod`.
-3. **"check the connection"**.
-4. **"build the catalog"**. This reads page types, components and fields from real pages on the site. A `Home/_blueprints` folder (one page per template with every allowed component) makes it complete on day one, but it's optional.
-5. Add `sources/`, `work/` and `runs/` (at the repo root) to `.gitignore`, and commit `.content-ops/` through a pull request.
+- **"copy the credentials from my .env.local for dev"**: three settings move to `~/.content-ops/<project>/dev.env` (never shown). Production only on purpose, with `--prod`.
+- **Commit `.content-ops/`** to the project repo through a pull request, so colleagues share the project name, site, decisions and lessons; add `sources/`, `work/` and `runs/` to `.gitignore`.
+- **"refresh the catalog"** after template changes, or add a `Home/_blueprints` folder (one page per template with every allowed component) if you want the catalog complete on day one.
+- **"set up content ops here"** with the setup questions, to record contacts and live-check site URLs.
 
 ## Where things live
 
 ![Where things live](rollout/diagrams/where-things-live.svg)
 
-The plugin, with the engine inside it, runs in Claude Code. The project repo holds the configuration, the catalog, the operations and the project's lessons. Client files, plans and journals stay in the git-ignored `sources/`, `work/` and `runs/` folders. Credentials live on your computer, outside every repo, and are never printed. Sitecore is reached through its Authoring GraphQL API, one environment at a time.
+The plugin, with the engine inside it, runs in Claude Code. The project folder holds the configuration, the catalog once something needs it, the operations and the project's lessons. Client files, plans and journals stay in the git-ignored `sources/`, `work/` and `runs/` folders. Credentials live on your computer, outside every repo, and are never printed. Sitecore is reached through its Authoring GraphQL API, one environment at a time.
 
 ## The daily loop
 
@@ -54,7 +53,7 @@ Sources become content JSON, with flags for anything unclear. The plan is a dry 
 
 | Say | What happens |
 |---|---|
-| what page types do we have? | Reads the catalog. No Sitecore call. |
+| what page types do we have? | Reads the catalog; the first time, builds it from the site (read-only, about a minute). |
 | make me an intake sheet for Service pages | A spreadsheet whose columns are exactly the Sitecore fields, to give to the client. |
 | plan it | Intake and a dry run, plus a report. Nothing is written. |
 | apply this on dev | Restates the environment and page count, asks, writes, reads back. |

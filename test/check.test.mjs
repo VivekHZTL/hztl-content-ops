@@ -28,3 +28,13 @@ test('check tests the connection with one read query', async () => {
   const out = await checkCommand(['--project', 'demo', '--env', 'dev'], { home, fetchImpl });
   assert.equal(out.connection, 'ok');
 });
+test('check in a project folder reads the home page and takes the project name from project.json', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cops-check-proj-'));
+  fs.mkdirSync(path.join(projectDir, '.content-ops'));
+  fs.writeFileSync(path.join(projectDir, '.content-ops', 'project.json'), JSON.stringify({ name: 'demo', siteRoot: '/s', homePath: '/s/Home', environments: [{ name: 'dev' }] }));
+  let asked;
+  const fetchImpl = async (url, init) => { if (/oauth/.test(url)) return { status: 200, json: async () => ({ access_token: 't', expires_in: 60 }) }; asked = JSON.parse(init.body).variables; return { status: 200, json: async () => ({ data: { item: { name: 'Home', path: '/s/Home' } } }) }; };
+  const out = await checkCommand(['--env', 'dev'], { home, fetchImpl, projectDir });
+  assert.equal(out.project, 'demo'); assert.equal(asked.p, '/s/Home');
+  assert.deepEqual(out.home, { name: 'Home', path: '/s/Home' }); assert.equal(out.connection, 'ok');
+});

@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { snapshotPage } from '../snapshot/page.mjs';
 import { planPage } from '../plan/page-plan.mjs';
 import { newRunDir, writeRun } from '../plan/run.mjs';
@@ -19,7 +19,7 @@ export async function planCommand(argv, deps = {}) {
   const ctx = context(deps);
   const env = need(flags, 'env', 'content-ops plan --env <name> --content <file|dir> [--pages a,b]');
   const target = need(flags, 'content', 'content-ops plan --env <name> --content <file|dir> [--pages a,b]');
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, env);
   const cm = ctx.cmFactory(env);
   const only = flags.pages && flags.pages !== true ? new Set(String(flags.pages).split(',')) : null;
   const registered = new Map(listSources(ctx.projectDir).map((s) => [s.file, s]));

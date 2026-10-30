@@ -1,6 +1,6 @@
 {
   "name": "@hztl/content-ops",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "private": true,
   "type": "module",
   "description": "SitecoreAI content authoring engine: snapshot, plan, journaled apply, verify, undo, publish.",

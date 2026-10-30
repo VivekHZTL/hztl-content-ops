@@ -1,6 +1,6 @@
 Content Ops for Claude Code: quick install (plain-text steps, paste anywhere)
 
-What it is: our Claude plugin for Sitecore content work. You talk to Claude in plain English inside the project folder; it reads your decks and sheets, plans the changes, writes them to Sitecore only after you say yes, verifies, and can undo. Works on any SitecoreAI project.
+What it is: our Claude plugin for Sitecore content work. You talk to Claude in plain English inside the project folder; it reads your decks and sheets, plans the changes, writes them to Sitecore only after you say yes, verifies, and can undo. Works on any SitecoreAI project. All you need is the plugin and a key file from your developer.
 
 Install (once per computer)
 
@@ -24,20 +24,19 @@ Windows
 
 Where things end up: the plugin, engine included, in Claude Code's plugin folder (installed from the public GitHub repo, no account needed); credentials later in ~/.content-ops/<project>/ (Mac) or C:\Users\<you>\.content-ops\<project>\ (Windows). Neither is inside any project folder.
 
-Set up a project (once per project, a developer, 10 minutes)
-Open the project repo in Claude Code and say:
-- "set up content ops here"
-- "copy the credentials from my .env.local for dev"   (copies 3 keys to ~/.content-ops/<project>/dev.env, never shown)
-- "check the connection"
-- "build the catalog"   (reads page types and components from the site; no special pages needed)
-Commit the new .content-ops folder.
+Connect (once per project and environment, a few minutes)
+Open a folder for the project in Claude Code (the project repo if you have it, otherwise any folder, e.g. Documents\<project>) and say:
+- "set me up to connect on dev"   (or qa, or prod)
+Claude makes an empty key file and tells you where (~/.content-ops/<project>/dev.env, or C:\Users\<you>\.content-ops\<project>\dev.env on Windows). Open it in a text editor (Notepad on Windows), paste the three values your developer gives you after the = signs (host, client id, client secret), save, and say "done". Never paste them into chat. Claude signs in, reads the site's home page and tells you what it found. That is the whole setup.
 
-Use it (authors)
-Open the project folder in Claude Code and say "set up content ops for this project". It sees the project is already set up, makes an empty credentials file for you, and says where it is. Paste the three values your developer gives you into that file in a text editor (never into chat), save, and say "check the connection". Then just type:
-- what page types do we have?
+Use it
+Just ask, for example:
+- what page types do we have?   (the first time, Claude reads them from the site; about a minute)
 - make me an intake sheet for Service pages
 - plan it  →  apply this on dev  →  verify  →  undo the <slug> page on dev
 - which pages have an empty SEO title? give me a report
+
+Optional, for developers: "copy the credentials from my .env.local for dev", and commit the .content-ops folder so colleagues share the project's settings.
 
 Rules
 - Every Sitecore write shows you the environment and the pages first and asks. Read it, then say yes in your own words.

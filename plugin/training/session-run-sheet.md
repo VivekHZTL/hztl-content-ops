@@ -18,9 +18,9 @@ Slides: 1–4 (title, no more manual authoring, your job moves up, driver’s se
 ## 2. Ask first, read-only (10–20 min)
 
 You type: **check the connection and tell me what page types and components we have**
-Behind it: `content-ops check --project <name> --env dev`, then `content-ops catalog show`.
+Behind it: `content-ops check --env dev` (reads the home page), then `content-ops catalog show --env dev` (builds the catalog on first use).
 Expected: `credentials: ok`, `connection: ok`, then a table of page types and components. No confirmation prompt appeared.
-If it differs: `credentials: missing` means the env file path is wrong; `credentials: incomplete` means a line in the file was mistyped (three keys, no quotes needed); `connection: failed` means the host or the tenant is wrong, show the message, it never contains the secret. Move on with the catalog only; it needs no connection.
+If it differs: `credentials: missing` means the env file path is wrong; `credentials: incomplete` means a line in the file was mistyped (three keys, no quotes needed); `connection: failed` means the host or the tenant is wrong, show the message, it never contains the secret. If a catalog is already saved, move on with it; it needs no connection.
 Do: point out that nothing asked for permission because nothing wrote.
 Don't: explain GraphQL. "It asked Sitecore a question" is enough.
 Slides: 5–7 (it knows your project, just say it, ask it anything).

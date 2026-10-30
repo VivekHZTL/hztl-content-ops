@@ -1,6 +1,6 @@
 # sitecore-content-ops plugin
 
-**Start here:** [ROLLOUT.md](ROLLOUT.md) is the one page a colleague reads before touching anything: what this is, the six steps to get started, setting up a new project, the daily loop, operations, safety, how it learns, and the FAQ.
+**Start here:** [ROLLOUT.md](ROLLOUT.md) is the one page a colleague reads before touching anything: what this is, getting started (install, one key file, connect), optional tech-team extras, the daily loop, operations, safety, how it learns, and the FAQ.
 
 The author-facing part of `@hztl/content-ops`: skills that drive the engine CLI in plain words, two
 read-only subagents, two slash commands, and hooks that keep authors inside the rules.
@@ -19,6 +19,10 @@ In the desktop app: **+ → Plugins**, add the marketplace, install `sitecore-co
 The engine ships inside the plugin at `engine/` and the skills run `${CLAUDE_PLUGIN_ROOT}/engine/bin/content-ops.mjs`.
 Nothing to configure. `$CONTENT_OPS_BIN` is only a fallback for installs older than 0.1.2.
 
+Setup is one sentence: "set me up to connect on dev". The setup skill runs `setup connect`, which needs only a key
+file at `~/.content-ops/<project>/<env>.env`, reads the site's home page, and writes a minimal
+`.content-ops/project.json`. No repo, catalog or blueprints are needed; the catalog is built when a task first needs it.
+
 ## Access
 
 There are no roles. The control is which credentials files a developer puts on the machine. Authors get
@@ -29,7 +33,7 @@ There are no roles. The control is which credentials files a developer puts on t
 | Skill | Role | Writes? |
 |---|---|---|
 | `content-ops` | router, ground rules, engine path | no |
-| `content-ops-setup` | tech team project setup, catalog | config files only |
+| `content-ops-setup` | connect with a key file (read the home page), join, optional tech-team extras | key file placeholder, project.json |
 | `content-ops-sources` | register and verify source files | manifest only |
 | `content-ops-intake` | sources → content JSON + inventory | work/ only |
 | `content-ops-map` | confirm profiles and section maps | profiles, decisions |

@@ -1,7 +1,7 @@
 // `apply --run <id> --confirm <env> [--prod] [--pages a,b] [--concurrency n] [--max-failures n]`
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { loadRun, assertRunFresh } from '../plan/run.mjs';
 import { verifySources } from '../sources/manifest.mjs';
 import { applyMany } from '../apply/many.mjs';
@@ -18,7 +18,7 @@ export async function applyCommand(argv, deps = {}) {
   if (confirm !== run.env) throw new Error(`--confirm "${confirm}" does not match the run's environment "${run.env}"`);
   assertRunFresh(run, { maxAgeHours: ctx.cfg.rules.planMaxAgeHours, sources: verifySources(ctx.projectDir) });
   const items = run.kind === 'items';
-  const { site } = items ? { site: null } : requireCatalog(ctx.cfg);
+  const { site } = items ? { site: null } : await ensureCatalog(ctx, run.env);
   const cm = ctx.cmFactory(run.env, { allowWrites: true });
   const only = flags.pages && flags.pages !== true ? new Set(String(flags.pages).split(',')) : null;
   const plans = (items ? run.changeSets : run.pages).filter((p) => p.status === 'ready' && (!only || only.has(p.key) || only.has(p.pageId)));

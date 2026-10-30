@@ -11,7 +11,7 @@ questions for the client, the developers and us.
 ## Steps
 
 1. Confirm sources are registered (`node <bin> sources verify`). Fix `changed`/`missing` first (content-ops-sources).
-2. Ask which page type the sources describe (a key from `.content-ops/catalog.json` `pageTypes`) and
+2. Ask which page type the sources describe (a key from `node "<bin>" catalog show --env <env>` `pageTypes`; it builds the catalog if there is none) and
    under which parent path new pages would sit. Defaults: ask; do not guess a parent path.
 3. First run: `node <bin> intake --page-type <key> --parent-path <path>`. If the JSON has `proposed`
    entries, the run stopped on purpose: it wrote `work/profile.proposed.json` (workbooks) and/or

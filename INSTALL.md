@@ -1,10 +1,10 @@
 # Install and use Content Ops
 
-One plugin per machine (the engine ships inside it). One `.content-ops/` folder per project. One credentials file per project per environment.
+One plugin per machine (the engine ships inside it). One key file per project per environment. That is all setup needs: no project code, catalog or blueprints.
 
 ## Once per machine (developer or author)
 
-1. Claude Code, git and Node 22 or newer.
+1. Claude Code and Node 22 or newer. On Windows also Git for Windows (Claude Code needs its Git Bash; the plugin's two safety hooks run under it).
 2. Register the plugin from the public repo (no GitHub account needed):
 
    ```bash
@@ -18,29 +18,48 @@ One plugin per machine (the engine ships inside it). One `.content-ops/` folder 
 
 Restart Claude Code. In any folder, typing `/content-ops` or saying "content ops" now routes to the skills.
 
-## Once per project (developer, about ten minutes)
+## Connect (anyone, a few minutes)
 
-In Claude Code, open the project repo and say:
+Open a folder for the project in Claude Code: the project repo if you have it, otherwise any folder
+(`Documents\<project>` on Windows). Say **"set me up to connect on dev"** (or qa, or prod).
 
-1. **"set up content ops here"** → `.content-ops/project.json` and `knowledge/` are created from your answers (site root, home path, environment names, contacts).
-2. **"copy the credentials from my .env.local for dev"** → `~/.content-ops/<project>/dev.env`, mode 600, never printed. Repeat for qa. Prod only with `--prod`, by a developer.
-3. **"check the connection"** → `credentials: ok`, `connection: ok`.
-4. **"build the catalog"** → page types, components and fields, read from one real page per template on the site. A `Home/_blueprints` folder (one page per template, every component once) is optional and makes the catalog complete on day one.
-5. Commit `.content-ops/` (including `knowledge/`). Git-ignore `sources/`, `work/`, `runs/`.
+1. Claude runs `content-ops setup connect --env dev`. Without a key file it makes an empty one at
+   `~/.content-ops/<project>/dev.env` (Windows: `C:\Users\<you>\.content-ops\<project>\dev.env`) and says where.
+2. Open it in a text editor (Notepad on Windows), paste the values after the `=` signs, save, and say "done".
+   Never paste them into chat.
 
-## Once per person on a project that is already set up (anyone, five minutes)
+   ```
+   SITECORE_API_HOST=https://xmc-<tenant>-<env>.sitecorecloud.io
+   SITECORE_CLIENT_ID=...
+   SITECORE_CLIENT_SECRET=...
+   SITECORE_EDGE_CONTEXT_ID=...   (optional)
+   ```
+3. Claude signs in, finds the site, reads its home page and tells you in plain words what it read. It writes
+   `.content-ops/project.json` (project name, site root, home page, language, environment) and nothing else.
+4. Ask for what you came to do. If you said it with the setup ("connect me to prod and list pages with no SEO
+   title"), Claude goes straight on.
 
-Get the repo (clone, pull, or unzip), open it in Claude Code and say **"set up content ops for this project"**.
-The setup skill sees `.content-ops/` is already there and joins instead of starting over: it runs
-`content-ops setup join`, which makes `~/.content-ops/<project>/` with an empty placeholder `<env>.env` for each
-non-production environment and lists what is still missing (engine path, catalog, .gitignore). Paste the three
-values your developer gives you into the placeholder in a text editor (never into chat), save, and say
-**"check the connection"**. Production placeholders only with `setup join --prod`, run by a developer.
+Production: a production key file is made only when you name production yourself. Reading is the same as on
+dev; every production write says PRODUCTION and asks again.
+
+The catalog (page types, components, fields) is not a setup step. The first command that needs it reads it from the
+site, about a minute on a large site, read-only, and saves `.content-ops/catalog.json`. `catalog refresh --env <e>`
+does a full pass later. A `Home/_blueprints` folder is optional.
+
+## Optional, for the tech team
+
+- **"copy the credentials from my .env.local for dev"** → `content-ops setup --from-env-local`, never printed.
+  Prod only with `--prod`, by a developer.
+- **Commit `.content-ops/`** (project name, site, knowledge, decisions) so colleagues share it; git-ignore
+  `sources/`, `work/`, `runs/`. A colleague who gets the repo says "set me up to connect on dev" and the
+  project's settings are reused; `content-ops setup join` makes empty key files for every non-production
+  environment at once.
+- **"set up content ops here"** with the setup questions (contacts, live-check site URLs, repo code paths).
 
 ## Many projects
 
 - The engine and the plugin are installed once. Nothing project-specific lives in them.
-- Each project repo has its own `.content-ops/` with its own name, catalog and knowledge. The name is what keys `~/.content-ops/<name>/`.
+- Each project folder has its own `.content-ops/` with its own name, knowledge and (once needed) catalog. The name is what keys `~/.content-ops/<name>/`.
 - Credentials never collide: `~/.content-ops/projecta/dev.env`, `~/.content-ops/projectb/dev.env`.
 - Switching projects is opening a different folder in Claude Code. The skills read `.content-ops/project.json` from the folder you are in and never remember another project's facts.
 - Lessons a project learns stay in its `knowledge/`. `content-ops lessons export` bundles the shareable ones; a developer folds them into the plugin by pull request so every project benefits.
@@ -49,7 +68,7 @@ values your developer gives you into the placeholder in a text editor (never int
 
 Plain English in Claude Code, in the project folder. The eight sentences from the session:
 
-1. check the connection and tell me what page types we have
+1. check the connection and tell me what page types we have (the first time, this builds the catalog)
 2. make me an intake sheet for <page type> pages
 3. plan it
 4. apply this on dev
@@ -62,7 +81,17 @@ Every Sitecore write asks first and restates environment and prod. Production ne
 
 ## Windows
 
-Same steps. Paths use your user folder (`C:\Users\<you>\.content-ops\…`). Claude Code on Windows needs Git Bash installed; the plugin’s two hooks are plain shell scripts and run under it. Not yet tested on Windows by the team; the first Windows user should say "check the connection" in a set-up project and report.
+Same steps; the engine is Node, so paths and the home folder resolve the Windows way
+(`C:\Users\<you>\.content-ops\…`). Notes:
+
+- Claude Code on Windows needs Git for Windows; the plugin's two safety hooks are POSIX `sh` scripts and run
+  through its Git Bash (`sh "<plugin>/scripts/…"`, so no executable bit is needed). `.gitattributes` keeps
+  them LF even when git's `core.autocrlf` is on.
+- Notepad may save the key file as `dev.env.txt` (setup connect spots it and says how to rename) or as UTF-16 /
+  UTF-8 with BOM (the engine reads all of them).
+- Run the `claude plugin …` install commands in Git Bash.
+- Engine and hooks are tested on macOS; the Windows paths are covered by unit tests but not yet by a run on a
+  Windows machine. The first Windows user: say "set me up to connect on dev" and report what it printed.
 
 ## Update the engine
 

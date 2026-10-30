@@ -1,99 +1,86 @@
 ---
 name: content-ops-setup
-description: Setup of a Sitecore project for the content-ops engine. Two paths - JOIN a project that already has .content-ops/ (a colleague's first run, a new laptop: credentials folder, placeholder env files, what is missing) or FIRST-TIME setup by the tech team (answers file, project config, credentials, role, catalog, connection check). Use when someone says set up content ops, set up content ops for this project, join this project, I got the repo, new laptop, onboard this repo, new project, build the catalog, credentials, env file, or when check reports missing configuration.
+description: Connect Claude to a SitecoreAI environment with nothing but a key file - make or check ~/.content-ops/<project>/<env>.env, sign in, read the site's home page, write the smallest project config, then carry on with what was asked. Also joins a project that already has .content-ops/ and, for the tech team, optional extras (answers file, .env.local copy). Use when someone says set up, connect me to prod/dev/qa, set up content ops, join this project, I got the repo, new laptop, credentials, key file, env file, check the connection, or when a command says the key file or project config is missing.
 ---
 
-# Project setup
+# Setup: a key file, a connection check, then the real task
 
-## 0. Which path? Look first
+Setup is short on purpose. The person may have only credentials: no project code, no `.content-ops/`, no catalog,
+no blueprints. That is enough. Do not ask them to set up a catalog or blueprints, and do not send them to a
+developer for one. The catalog is built later, by itself, the first time a task needs page types or components.
 
-Check whether `.content-ops/project.json` exists in the folder Claude Code is open in.
+Engine: `node "<bin>" …` (see the content-ops skill for `<bin>`). Every command prints JSON with a `say` line in
+plain words; relay it.
 
-- **It exists → JOIN (anyone, about five minutes).** The project is already set up; do not ask the setup
-  questions and never run `setup --answers` (it refuses without `--force`, and `--force` would overwrite the team's
-  committed config). Say: "This project is already set up. I'll get your computer ready for it."
-  1. If the repo is a git clone, offer the sync-repo skill first so `.content-ops/` is the latest.
-  2. Run `node <bin> setup join` (add `--prod` only when a developer says this person gets production).
-     It makes `~/.content-ops/<name>/` and an empty placeholder `<env>.env` per non-production environment, never
-     overwrites a filled file, and prints JSON: `environments[].status`, `engine`, `catalog`,
-     `gitignore`, `next`.
-  3. Relay it as a short table (environment, file, status) and the `next` lines in plain words. Status words:
-     `ok` ready; `placeholder-created` / `empty` waiting for the three values; `incomplete` one value missing;
-     `skipped-production` on purpose.
-  4. Filling a file: the person opens it in a text editor (on a Mac `open -e <file>`; on Windows Notepad) and pastes
-     the values after the `=` signs. You never open, read or print it, and never ask them to paste values into chat.
-     A developer can instead say "copy the credentials from my .env.local for dev" (step 2 below, with `--force` since
-     the placeholder exists).
-  5. Then `node <bin> check --project <name> --env <env>` for each filled file. Done when `credentials: ok` and
-     `connection: ok`. Then hand over to the content-ops skill: "Try: what page types do we have?"
-  If `gitignore.missing` is not empty or `catalog` is null, say which developer task is left; an author does not fix it.
+## 1. Connect (everyone, a few minutes)
 
-- **It does not exist → FIRST-TIME setup below (tech team, about one hour).** If the person expected it to exist,
-  ask them to pull the latest repo or get a fresh copy before starting a new setup.
+They say "set up for me to connect on prod" (or dev, qa, "connect me to Sitecore"). Work out the environment name
+from their words (`prod`, `dev`, `qa`…). Then:
 
-# First-time setup (tech team, about one hour)
+1. **Folder.** Claude Code must be open in a folder for this project's work (the project repo, or any folder such as
+   `Documents\<project>` on Windows). If it is open in their home folder, `connect` answers `wrong-folder`; say what
+   it says.
+2. Run `node "<bin>" setup connect --env <env>`. Add `--project <name>` when you know the short project name
+   (lower case, no spaces, often the client name). Add `--prod` only when the person said production themselves.
+3. Act on `status`:
 
-Outcome: the `.content-ops` folder exists in the project repo, each environment has a credentials file outside
-any repo, `check` is green, and `catalog.json` describes the project's page types and components.
+| status | what to do |
+|---|---|
+| `need-project-name` | Ask the question in `say` (or pick from `candidates` with them), rerun with `--project`. |
+| `key-file-created` | An empty key file now exists at `env.file`. Offer to open it with the `open` command (Notepad on Windows). They paste the host, client id and client secret after the `=` signs and save. Say: please don't paste them here. Wait for "done", then rerun. |
+| `key-file-incomplete` | Same, naming `missing`. |
+| `key-file-misnamed` | Windows Notepad saved `dev.env.txt`; relay the rename steps in `say`. |
+| `needs-prod-ok` | Production. Go on only if they named production themselves; then rerun with `--prod`. |
+| `connection-failed` | Relay `say` and the `error` (it never holds a secret). Usually a wrong or mistyped value in the key file. |
+| `choose-site` | Several sites. Ask which one they work on, rerun with `--site <name>`. |
+| `connected` | Done. Relay `say`: the host, production yes/no, and the home page read (name, path, last updated, pages under it). |
 
-## 1. Answers
+You never create, open, read or print the key file contents yourself, and never ask anyone to paste values into
+chat. Where the values come from: the project's developer, or the SitecoreAI Cloud Portal (an automation client for
+that environment). `SITECORE_EDGE_CONTEXT_ID` is optional (only for checking published content on Edge).
 
-Run `node <bin> setup questions` and ask the developer each question in plain words. Write the answers
-to a file outside the repo or in the scratch folder, e.g. `/tmp/<project>-answers.json`:
+`connect` only reads Sitecore. On first success it writes `.content-ops/project.json` with the project name, the
+site root and home page it found, the language and the environment; a second environment is added to the same file.
+Nothing else is required.
 
-```json
-{ "name": "<short project name>", "siteRoot": "/sitecore/content/<Tenant>/<Site>", "homePath": "/sitecore/content/<Tenant>/<Site>/Home",
-  "language": "en", "environments": [{ "name": "dev", "siteUrl": "https://dev.<site>" }, { "name": "qa", "siteUrl": "https://qa.<site>" }, { "name": "prod", "siteUrl": "https://www.<site>" }],
-  "blueprintRoot": "/sitecore/content/<Tenant>/<Site>/Home/_blueprints", "repoRoot": "headapps/<app>", "placeholders": null }
-```
+4. **Then do what they asked.** If the request was only "set me up", offer two or three things to try in plain
+   words ("show me the pages under Home", "what page types do we have", "check this page for broken links").
+   If it came with a task ("set me up on prod and find pages with an empty SEO title"), go straight to it.
 
-Include `contacts` (`{ "dev": "<name>", "content": "<name>" }`): the skills name these people when an author is stuck.
-Then `node <bin> setup --answers <file>`. Read back the `next` lines and relay them.
+Later, `node "<bin>" check --env <env>` re-checks a connection and reads the home page again.
 
-## 2. Credentials, by hand, never through Claude
+## 2. The project already has `.content-ops/` (a colleague, a new laptop)
 
-The developer creates one file per environment at `~/.content-ops/<name>/<env>.env` with
-`SITECORE_API_HOST`, `SITECORE_CLIENT_ID`, `SITECORE_CLIENT_SECRET` (environment automation client of
-that environment). You do not create, open, read or print these files. Say exactly where they go and
-what keys they need. Authors usually get `dev.env` and `qa.env`; `prod.env` goes to whoever the project lead decides. Anyone with `prod.env` can write to production: the engine needs `--prod`, which you add only when the person named production, and the prompt says PRODUCTION.
+If `.content-ops/project.json` exists, the project is set up; never run `setup --answers` (it would overwrite the
+team's config). Offer sync-repo first when it is a git clone. Then either run `setup connect --env <env>` as above
+(it reuses the project's name and site), or `node "<bin>" setup join` to make empty key files for every
+non-production environment at once (`--prod` only when a developer says this person gets production). Relay
+`environments[].status` and `next` as a short table, then `setup connect` for each filled file.
 
-Or, if the developer points you at the head app's `.env.local`: `node <bin> setup --from-env-local <path> --env <name>`.
-Say first: "I will copy three settings from that file into a safe place outside the project. I will not show
-them to you or to anyone." The command prints only the host and the first four characters of the client id.
-Prod needs `--prod` and a developer. Never open or read the file yourself.
+## 3. Optional extras for the tech team
 
-Then `node <bin> check --project <name> --env dev`. Expect `credentials: ok` and `connection: ok`. If
-`connection` fails, the message is safe to show; the secret is never in it.
+None of these are needed before anyone can work. Mention them only when someone asks.
 
-## 3. Engine
+- **Copy credentials from a head app `.env.local`:** `node "<bin>" setup --from-env-local <path> --env <name>`
+  (`--force` when a placeholder exists, `--prod` for production with a developer). Say first: "I will copy three
+  settings from that file into a safe place outside the project. I will not show them to you or to anyone." It
+  prints only the host and the first four characters of the client id. Never open the file yourself.
+- **Answers file (all settings at once):** `node "<bin>" setup questions`, ask in plain words, write the answers to a
+  scratch file, `node "<bin>" setup --answers <file>`. Adds contacts, live-check site URLs, repo code paths,
+  placeholder hints. `setup connect` afterwards checks it.
+- **Catalog (page types and components):** built automatically the first time a task needs it, from the
+  environment that task uses; the command output says `catalogBuilt` when that happens. To build or update it on
+  purpose: `node "<bin>" catalog show --env <env>` (builds if missing), `catalog build --env <env>`, or after a
+  template change `catalog refresh --env <env>` (never deletes; a developer reviews `summary.added`, `missing`,
+  `changed` and runs `catalog verify <key>`). It learns from one real page per template; a blueprint folder
+  (`<home>/_blueprints`, one page per template with every component once) is optional and only makes it complete
+  sooner.
+- **Repo hygiene:** in a git repo, `sources/`, `work/` and `runs/` should be git-ignored; propose the lines, the
+  developer commits them.
 
-The engine ships inside the plugin (`${CLAUDE_PLUGIN_ROOT}/engine/bin/content-ops.mjs`); there is no path or
-role to set. Access is controlled by which credentials files a developer hands out.
+## Windows
 
-## 4. Blueprint pages (optional)
-
-If `blueprintRoot` holds one page per page template with every allowed component placed once, the catalog is
-complete on day one. If it does not exist, `catalog build` discovers one real page per template from the site
-(the page using the most components) and builds from those; the JSON says `source: discovered` and lists them.
-Tell the developer: components no page uses yet are missing until `catalog refresh` after the site grows, or
-until they add the blueprint folder.
-
-## 5. Catalog
-
-First time: `node <bin> catalog build --env dev`. After a template change: `node <bin> catalog refresh --env dev`;
-it never deletes. Read `summary.added`, `summary.missing`, `summary.changed`; for each, the developer looks and
-runs `node <bin> catalog verify <key>`. `node <bin> catalog show` prints every component with its status.
-
-`node <bin> catalog build --env dev`. Read the JSON: page types, component count, placeholders, `errors`.
-Any error (orphan child placeholder, a component placed both top-level and nested) means a blueprint fix.
-Then open `.content-ops/catalog.json` once and summarise: page types and their component order, components
-with children, which are themed. For each page type the project will create pages for, the developer adds
-`"pageTypes": { "<key>": { "branchId": "<guid>" } }` to `project.json` when a branch exists, then rebuilds.
-
-## 6. Repo hygiene
-
-`sources/`, `work/`, `runs/` must be git-ignored. Check `.gitignore`; propose the three lines if missing
-(the developer commits them).
-
-Report: a table of what exists now (config files, envs with `check` status, catalog counts) and what is
-still missing.
+Same steps. Key files live in `C:\Users\<you>\.content-ops\<project>\<env>.env`. Open them with Notepad
+(`notepad "<file>"`). Notepad may save as `.env.txt` (connect detects it) or in another encoding (the engine reads
+UTF-8, UTF-8 with BOM and UTF-16). Claude Code on Windows runs the plugin's safety hooks through Git Bash, which
+comes with Git for Windows.

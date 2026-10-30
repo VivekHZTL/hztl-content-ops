@@ -1,7 +1,7 @@
 // `export --env <e> --paths a,b [--out work/]`: existing pages → content JSON (read-only).
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { snapshotPage } from '../snapshot/page.mjs';
 import { exportPage } from '../ingest/sitecore.mjs';
 import { writeJson } from '../config/project.mjs';
@@ -12,7 +12,7 @@ export async function exportCommand(argv, deps = {}) {
   const usage = 'content-ops export --env <name> --paths <item path>[,<item path>] [--out work/]';
   const env = need(flags, 'env', usage);
   const paths = String(need(flags, 'paths', usage)).split(',').map((p) => p.trim()).filter(Boolean);
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, env);
   const cm = ctx.cmFactory(env);
   const outDir = path.resolve(ctx.projectDir, flags.out && flags.out !== true ? flags.out : 'work');
   const written = [], notes = [], missing = [];

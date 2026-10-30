@@ -1,0 +1,5 @@
+# Hook scripts run under sh (Git Bash on Windows). CRLF line endings break them, so keep LF whatever core.autocrlf says.
+*.sh text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf

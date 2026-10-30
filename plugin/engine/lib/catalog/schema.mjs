@@ -22,7 +22,8 @@ export function validateCatalog(c) {
       else if (parent.childPh !== comp.ph) errors.push(`components.${key}.ph "${comp.ph}" does not match its parent's childPh "${parent.childPh ?? ''}"`);
     }
     for (const ch of comp.children || []) if (!comps[ch]) errors.push(`components.${key}.children names unknown component "${ch}"`);
-    if ((comp.placements || []).length > 1) errors.push(`components.${key} is placed both at the top level and nested on the blueprint pages; fix the blueprint or split the component`);
+    // from blueprints the tech team can fix the page; from real pages it is a fact of the site, and build keeps the first placement with a warning
+    if ((comp.placements || []).length > 1 && c.source !== 'discovered') errors.push(`components.${key} is placed both at the top level and nested on the blueprint pages; fix the blueprint or split the component`);
     if (['hero', 'main'].includes(comp.ph) && Object.values(comps).some((p) => (p.children || []).includes(key))) errors.push(`components.${key} is listed as a child but its ph is "${comp.ph}"; a component cannot be both top-level and nested`);
   }
   return errors;

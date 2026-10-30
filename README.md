@@ -37,8 +37,16 @@ The engine refuses a credentials file inside a repo and never prints a secret. A
 host contains `prod` or `prd` is production; writes there need `--prod` as well as `--confirm <env>`.
 
 ```bash
-node plugin/engine/bin/content-ops.mjs check --project <name> --env dev
+node plugin/engine/bin/content-ops.mjs setup connect --env dev [--project <name>]   # the whole setup
+node plugin/engine/bin/content-ops.mjs check --env dev                               # later re-checks
 ```
+
+`setup connect` needs only the key file. It signs in, lists the sites (`solutionSites`, or the `Home` items under
+`/sitecore/content`), reads the site's home page, and writes the minimal `.content-ops/project.json`
+(`name`, `siteRoot`, `homePath`, `language`, `environments`). Read-only on Sitecore. Its JSON has a `status`
+(`connected`, `key-file-created`, `key-file-incomplete`, `key-file-misnamed`, `needs-prod-ok`, `choose-site`,
+`need-project-name`, `connection-failed`, `wrong-folder`) and a plain-words `say` line. Key files saved by
+Windows Notepad (UTF-8 BOM, UTF-16, CRLF) are read as-is.
 
 ## Write gate
 
@@ -51,9 +59,10 @@ rejects stop the publish before any call. Undo refuses a journal from another en
 
 | Command | Mode | Does |
 |---|---|---|
-| `check --project <name> --env <env> [--offline]` | read | env, credentials present, CM answers |
-| `setup --answers <file>` / `setup questions` | local | write `.content-ops/` from an answers file; print the answer schema |
-| `catalog build --env <env>` | read | generate `.content-ops/catalog.json` from the blueprint pages (+ repo code paths) |
+| `setup connect --env <env> [--project n] [--site s] [--prod]` | read + local | key file (made empty if missing), sign in, read the home page, minimal `project.json` |
+| `check --env <env> [--project <name>] [--offline]` | read | env, credentials present, CM answers, home page read (in a project folder) |
+| `setup --answers <file>` / `setup questions` | local | optional: write `.content-ops/` from an answers file; print the answer schema |
+| `catalog build --env <env>` | read | optional: generate `.content-ops/catalog.json` (blueprint pages if present, else one real page per template, + repo code paths). Commands that need a catalog build it on the fly |
 | `sources register <file> [--note t]` / `list` / `verify` | local | manifest of input files by content hash |
 | `plan --env <env> --content <file|dir> [--pages a,b]` | read | dry run → `runs/<id>/plan.json`, `summary.json` |
 | `show --run <id> [--status a,b] [--page key] [--pending]` | local | compact view of a run |
@@ -65,9 +74,9 @@ rejects stop the publish before any call. Undo refuses a journal from another en
 
 ```
 <project>/
-  .content-ops/project.json     name, siteRoot, homePath, language, environments, blueprintRoot, repoRoot
+  .content-ops/project.json     name, siteRoot, homePath, language, environments (the minimum setup connect writes); optional blueprintRoot, repoRoot, contacts, placeholders
   .content-ops/rules.json       themes, placeholders tokens, newTab policy, removeMissingComponents, planMaxAgeHours
-  .content-ops/catalog.json     generated: device, placeholders, pageTypes, components (renderingId, dsTemplateId, fields, children, childPh, parent, codePath)
+  .content-ops/catalog.json     optional, generated on first need: device, placeholders, pageTypes, components (renderingId, dsTemplateId, fields, children, childPh, parent, codePath)
   .content-ops/decisions.json   [] register of human decisions (phase C fills it)
   .content-ops/overrides.json   {} source overrides with reasons (phase C fills it)
   .content-ops/sources.json     manifest written by `sources register`
@@ -76,8 +85,12 @@ rejects stop the publish before any call. Undo refuses a journal from another en
   runs/                         dry runs and real runs: plan.json, summary.json, journal/, results-*.json (git-ignored)
 ```
 
-Blueprint convention: under `blueprintRoot` (default `<homePath>/_blueprints`) the tech team keeps one page per
-page template with every allowed component placed once. `catalog build` reads those pages.
+The catalog is optional and lazy. `plan`, `intake`, `template`, `export`, `create`, `apply`, `verify` and `catalog show`
+build it from their environment the first time they need it (a bounded look at up to 1,500 items under Home, one
+page per template, then the renderings and templates those pages use; read-only, about 20 seconds on a large site)
+and report `catalogBuilt`. `catalog build` / `refresh` walk the whole tree. Blueprint pages are optional: under
+`blueprintRoot` (default `<homePath>/_blueprints`) one page per page template with every allowed component placed
+once makes the catalog complete on day one.
 
 ## Content JSON (what the planner consumes)
 

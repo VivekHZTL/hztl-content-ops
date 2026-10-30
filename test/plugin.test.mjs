@@ -67,7 +67,7 @@ test('T12: every skill and agent has frontmatter; descriptions fit; hooks refere
   assert.ok(agents.length >= 2);
   for (const f of [...skills, ...agents]) { const fm = frontmatter(read(f)); assert.ok(fm?.name && fm?.description, f); assert.ok(fm.description.length <= 1024, `${f}: description ${fm.description.length} chars`); }
   const hooks = JSON.parse(read(path.join(plugin, 'hooks/hooks.json')));
-  for (const h of hooks.hooks.PreToolUse.flatMap((m) => m.hooks)) { const rel = h.command.replace(/^"\$\{CLAUDE_PLUGIN_ROOT\}"\//, ''); const f = path.join(plugin, rel); assert.ok(fs.existsSync(f), f); assert.ok(fs.statSync(f).mode & 0o111, `${f} not executable`); }
+  for (const h of hooks.hooks.PreToolUse.flatMap((m) => m.hooks)) { assert.match(h.command, /^sh "\$\{CLAUDE_PLUGIN_ROOT\}\/[^"]+\.sh"$/, 'run through sh so Windows (Git Bash) needs no exec bit'); const rel = h.command.replace(/^sh "\$\{CLAUDE_PLUGIN_ROOT\}\//, '').replace(/"$/, ''); assert.ok(!read(path.join(plugin, rel)).includes('\r'), `${rel} has CRLF line endings`); const f = path.join(plugin, rel); assert.ok(fs.existsSync(f), f); assert.ok(fs.statSync(f).mode & 0o111, `${f} not executable`); }
 });
 test('T12: every content-ops command named in the plugin exists in the CLI; no forbidden phrasing; no hosts or GUIDs', () => {
   const bin = read(path.join(root, 'plugin/engine/bin/content-ops.mjs'));
@@ -114,10 +114,11 @@ test('F1: new skills exist; the router mentions lessons, template, mappings and 
   assert.doesNotMatch(router, /\.content-ops\/learnings/);
   assert.match(read(path.join(plugin, 'README.md')), /ROLLOUT\.md/);
   const guide = read(path.join(plugin, 'ROLLOUT.md'));
-  assert.match(guide, /claude plugin marketplace add /); assert.match(guide, /set up content ops for this project/);
+  assert.match(guide, /claude plugin marketplace add /); assert.match(guide, /set me up to connect on/); assert.doesNotMatch(guide, /build the catalog\*\*/);
   for (const d of ['where-things-live', 'daily-loop', 'learning-loop']) assert.ok(fs.existsSync(path.join(plugin, 'rollout/diagrams', `${d}.svg`)) && guide.includes(`rollout/diagrams/${d}.svg`), d);
   const setup = read(path.join(plugin, 'skills/content-ops-setup/SKILL.md'));
   assert.match(setup, /--from-env-local/); assert.match(setup, /catalog refresh/);
+  assert.match(setup, /setup connect --env/); assert.match(setup, /Do not ask them to set up a catalog or blueprints/);
   for (const f of walk(plugin, /\.md$/)) { const s = read(f); assert.doesNotMatch(s, /training level 5/, f); }
 });
 

@@ -12,7 +12,7 @@ write anything to Sitecore without their yes.
 ## Ground rules (every role skill inherits these)
 
 1. **Read first, write later.** `check`, `sources`, `intake`, `plan`, `show`, `verify`, `live-check`,
-   `snapshot`, `decide list`, `report`, `history`, `export`, `scan`, `refs`, `delete plan`, `catalog show`, `mappings list`, `rules list`, `lessons list` never touch Sitecore; `setup`, `catalog build`, `catalog refresh`, `catalog verify`, `sources register`, `decide`, `template`, `mappings forget`, `rules set`, `lessons add`, `lessons export`
+   `snapshot`, `decide list`, `report`, `history`, `export`, `scan`, `refs`, `delete plan`, `catalog show`, `mappings list`, `rules list`, `lessons list` never write to Sitecore; `setup`, `setup connect`, `catalog build`, `catalog refresh`, `catalog verify`, `sources register`, `decide`, `template`, `mappings forget`, `rules set`, `lessons add`, `lessons export`
    write only project files. `setup --from-env-local` copies credentials to `~/.content-ops` and asks first like a write. Run those freely. The **Sitecore writes** are `apply`, `create`, `publish`, `undo`, `delete apply`, `delete undo`. `transform` and
    `relink` edit `work/` files only.
 2. **Every write needs the user's OK in chat, in their own words, naming the environment and the
@@ -49,12 +49,21 @@ The engine is the `content-ops` CLI and ships inside this plugin. Resolve it onc
 Always quote the path, since it may contain spaces: `node "<bin>" <command> …`. Node 22 or newer is required;
 if `node -v` is older or missing, say so and stop.
 
-Call it as `node "<bin>" <command> …` from the project root (the folder with `.content-ops/`). Every
+Call it as `node "<bin>" <command> …` from the project folder (the one with `.content-ops/`; any work folder
+when there is no repo). Every
 command prints JSON; read the JSON, not the screen. `node <bin>` with no command prints the usage.
 
 Project facts (site root, home path, environments, hosts, language, page types, components) come from
 `.content-ops/project.json`, `rules.json` and `catalog.json`. Never hard-code or remember them across
 projects.
+
+**What a project needs: a key file and `project.json`, nothing else.** If `.content-ops/project.json` is missing or
+the environment has no key file, run content-ops-setup's connect step (a few minutes), then carry on with the
+request. Never ask anyone to build a catalog or blueprints before they can work. `catalog.json` is optional and
+lazy: commands that need page types or components (`plan`, `intake`, `template`, `export`, `create`, `catalog
+show`) build it from the environment on the command the first time (about a minute on a large site, read-only)
+and say so in `catalogBuilt`; relay that line. Pass `--env` so they can. Questions like "what page types / components
+/ fields do we have" → `catalog show --env <env>`.
 
 ## Who is asking
 
@@ -64,8 +73,9 @@ still applies to everyone.
 
 ## Start of session
 
-Run `node <bin> lessons list --last 10` once and say in one line what this project has already learned (or
-that it is new). When someone is stuck or asks who to talk to, read `contacts` from `.content-ops/project.json`
+If there is no `.content-ops/project.json` yet, skip this and go to setup's connect step only when the request
+needs Sitecore. Otherwise run `node <bin> lessons list --last 10` once and say in one line what this project has
+already learned (or that it is new). When someone is stuck or asks who to talk to, read `contacts` from `.content-ops/project.json`
 and name that person; never guess a name.
 
 ## Routing
@@ -73,7 +83,8 @@ and name that person; never guess a name.
 | They say | Use |
 |---|---|
 | new kind of change, can we do X across pages, shared datasource, Data records, rename, move, redirect, unpublish, repoint references, no command for this | content-ops-build |
-| set up, set up for this project, join, got the repo, new laptop, new project, blueprint, catalog, credentials, env file | content-ops-setup (it picks join or first-time) |
+| set up, connect me to prod/dev/qa, join, got the repo, new laptop, new project, credentials, key file, env file, check the connection | content-ops-setup (connect first, then the task) |
+| what page types, components or fields do we have, build or refresh the catalog | `catalog show --env <env>` (builds it if missing); content-ops-inspect-code for one component |
 | register, sources, download, SharePoint, which file is current | content-ops-sources |
 | intake, inventory, what is in these decks, questions for the client | content-ops-intake |
 | mapping, profile, which column goes where, section map, alias | content-ops-map |

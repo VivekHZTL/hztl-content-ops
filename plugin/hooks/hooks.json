@@ -4,8 +4,8 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/safety-guard.sh" },
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/write-confirm.sh" }
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/safety-guard.sh\"" },
+          { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/write-confirm.sh\"" }
         ]
       }
     ]

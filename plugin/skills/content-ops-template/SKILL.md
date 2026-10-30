@@ -10,7 +10,8 @@ type, plus a README tab the client can read. A filled copy dropped in `sources/`
 
 ## Steps
 
-1. Ask which page type (`node <bin> catalog show` lists them with their components). If the person
+1. Ask which page type (`node <bin> catalog show --env <env>` lists them with their components, building the
+   catalog first if there is none). Pass `--env <env>` to `template` as well. If the person
    describes a page instead of naming a type, pick the closest and say why.
 2. `node <bin> template --page-type <key>`. Options: `--components a,b` to leave some components out,
    `--children 5` when cards or panels repeat more than three times, `--format csv` when the client

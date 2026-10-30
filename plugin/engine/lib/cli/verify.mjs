@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { loadRun } from '../plan/run.mjs';
 import { verifyWritten } from '../verify/replan.mjs';
 import { verifyChangeSet } from '../items/apply.mjs';
@@ -29,7 +29,7 @@ export async function verifyCommand(argv, deps = {}) {
     }
     return emit(ctx, save({ runId: run.runId, env: run.env, checked: sets.length, upToDate: sets.filter((s) => s.status === 'up-to-date').length, pages: sets }));
   }
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, run.env);
   const out0 = await verifyWritten({ cm, run, keys: [...done], catalog, rules: ctx.cfg.rules, contentFor: (key) => run.pages.find((p) => p.key === key)?.content });
   return emit(ctx, save(out0));
 }

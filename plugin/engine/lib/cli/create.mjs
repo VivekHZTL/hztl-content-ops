@@ -2,7 +2,7 @@
 // target.mode "create". Journaled. Afterwards the author runs plan again (now update) and apply.
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { loadRun } from '../plan/run.mjs';
 import { createPage } from '../apply/create-page.mjs';
 import { assertWritable } from '../apply/guards.mjs';
@@ -16,7 +16,7 @@ export async function createCommand(argv, deps = {}) {
   const confirm = flags.confirm === true ? '' : flags.confirm;
   if (!confirm) throw new Error(`Writes need --confirm ${run.env}. ${usage}`);
   if (confirm !== run.env) throw new Error(`--confirm "${confirm}" does not match the run's environment "${run.env}"`);
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, run.env);
   const cm = ctx.cmFactory(run.env, { allowWrites: true });
   assertWritable(cm, { confirm, prod: !!flags.prod });
   const applyId = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);

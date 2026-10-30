@@ -1,7 +1,7 @@
 {
   "name": "sitecore-content-ops",
   "displayName": "Sitecore Content Ops",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "A harness for SitecoreAI content work: Claude builds whatever a task needs (pages from decks and sheets, shared datasources, Data records, page swaps, clean-ups) and every write goes through one governed engine: dry run, confirm, journal, read-back, undo, separate publish. Ships with playbooks from a large production project.",
   "author": { "name": "HZTL" },
   "license": "UNLICENSED",

@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, requireCatalog } from './common.mjs';
+import { context, emit, ensureCatalog } from './common.mjs';
 import { registerSource, listSources } from '../sources/manifest.mjs';
 import { readWorkbook, sheetColumns, detectLayout } from '../ingest/xlsx.mjs';
 import { proposeProfile, workbookToContent } from '../ingest/xlsx-adapter.mjs';
@@ -30,7 +30,7 @@ const safe = (s) => String(s).replace(/[^A-Za-z0-9._-]+/g, '-');
 export async function intakeCommand(argv, deps = {}) {
   const { flags } = parseArgs(argv);
   const ctx = context(deps);
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, flags.env);
   const srcDir = path.resolve(ctx.projectDir, flags.sources && flags.sources !== true ? flags.sources : 'sources');
   const outDir = path.resolve(ctx.projectDir, flags.out && flags.out !== true ? flags.out : 'work');
   fs.mkdirSync(outDir, { recursive: true });

@@ -9,8 +9,11 @@ Answer "what can this component hold?" from two sources, in this order, read-onl
 
 1. `.content-ops/catalog.json` → `components.<key>`: `name`, `ph` (hero, main, or the parent's child
    placeholder), `themed`, `fields` (name and Sitecore type), `children`, `childPh`, `dsTemplateName`,
-   `codePath`. If the key is unknown, list the closest names.
-2. The component file at `codePath` (relative to `project.repoRoot`), plus any `*.PLAN.md` beside it.
+   `codePath`. If the key is unknown, list the closest names. No `catalog.json` yet: run
+   `node "<bin>" catalog show --env <env>`, which builds it from the site first (read-only), then answer.
+2. The component file at `codePath` (relative to `project.repoRoot`), plus any `*.PLAN.md` beside it. No repo or
+   no `codePath` (common when someone only has credentials): answer from the catalog alone and say the code was
+   not checked.
    Look for: maximum items or slices (`slice(0, 5)`, `max`), required props, image handling, variants
    (`FieldNames`), theme params. Quote the line you base a limit on.
 

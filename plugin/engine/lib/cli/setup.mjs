@@ -1,22 +1,25 @@
-// `setup --answers <file>`: write .content-ops/ from a non-interactive answers file (the skill asks the
+// `setup connect --env <e>`: the usual setup - key file, sign in, read the home page, minimal project.json
+// (connect.mjs). `setup --answers <file>`: write .content-ops/ from a non-interactive answers file (the skill asks the
 // questions). `setup questions` prints the answer schema. `setup join`: a colleague's first run on a repo that
 // already has .content-ops/ - make the credentials folder, empty placeholders, and report what is still missing.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from './args.mjs';
 import { validateProject, writeJson, loadProject } from '../config/project.mjs';
 import { execFileSync } from 'node:child_process';
 import { parseEnvFile, resolveEnv, EnvError } from '../client/env.mjs';
 import { ensureKnowledge } from '../knowledge/store.mjs';
+import { connectCommand, keyFileTemplate } from './connect.mjs';
 
 export const QUESTIONS = {
   name: 'Short project name, used for ~/.content-ops/<name>/<env>.env (required)',
   siteRoot: 'Sitecore item path of the site root, e.g. /sitecore/content/<Tenant>/<Site> (required)',
   homePath: 'Item path of the Home item (required)',
   language: 'Content language, default en',
-  environments: 'List of { name, siteUrl }: name matches the credentials file (dev, qa, prod); siteUrl is the rendering host for live checks (required, at least one)',
-  blueprintRoot: 'Item path holding one blueprint page per page template; default <homePath>/_blueprints',
+  environments: 'List of { name, siteUrl }: name matches the credentials file (dev, qa, prod); siteUrl is the rendering host for live checks (optional). At least one environment is required',
+  blueprintRoot: 'Optional. Item path holding one blueprint page per page template; default <homePath>/_blueprints. Without it, page types are learned from existing pages when a task first needs them',
   repoRoot: 'Path to the head app repo, for component code paths (optional)',
   placeholders: '{ hero, main } placeholder paths when the blueprint cannot tell them apart (optional)',
   contacts: 'Who to ask: { dev: "<name>", content: "<name>" } (optional; the skills print these instead of guessing a person)',
@@ -27,6 +30,7 @@ export async function setupCommand(argv, deps = {}) {
   const projectDir = path.resolve(deps.projectDir || process.cwd());
   const print = deps.print !== false;
   if (_[0] === 'questions') { if (print) console.log(JSON.stringify(QUESTIONS, null, 1)); return QUESTIONS; }
+  if (_[0] === 'connect') return connectCommand(argv.slice(argv.indexOf('connect') + 1), deps);
   if (_[0] === 'join') return joinProject(projectDir, flags, deps, print);
   if (flags['from-env-local']) {
     const src = flags['from-env-local'] === true ? null : path.resolve(flags['from-env-local']);
@@ -72,8 +76,7 @@ export async function setupCommand(argv, deps = {}) {
     wrote: ['.content-ops/project.json', '.content-ops/knowledge/', '.content-ops/decisions.json', '.content-ops/overrides.json', '.content-ops/sources.json'],
     next: [
       `A developer creates ${path.join(home, '.content-ops', project.name, '<env>.env')} for each environment (outside any repo).`,
-      `Run: content-ops check --project ${project.name} --env ${project.environments[0].name}`,
-      `Run: content-ops catalog build --env ${project.environments[0].name}  (needs the blueprint pages under ${project.blueprintRoot})`,
+      `Run: content-ops setup connect --env ${project.environments[0].name}  (signs in and reads the home page)`,
       'Add sources/, work/ and runs/ to .gitignore if they are not already.',
     ],
   };
@@ -81,19 +84,10 @@ export async function setupCommand(argv, deps = {}) {
   return out;
 }
 
-const ENGINE_BIN = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', 'bin', 'content-ops.mjs');
+const ENGINE_BIN = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'bin', 'content-ops.mjs');
 const KEYS = ['SITECORE_API_HOST', 'SITECORE_CLIENT_ID', 'SITECORE_CLIENT_SECRET'];
 const PROD = /prod|prd/i;
-const placeholder = (project, env) => `# Content Ops credentials: project "${project}", environment "${env}".
-# Fill the values after the = signs, save, then tell Claude "check the connection".
-# Get them from the project's developer or the Sitecore Cloud Portal. Never paste them into Claude chat.
-#
-# Required: the CM host (e.g. https://xmc-....sitecorecloud.io) and the environment's automation client.
-${KEYS.map((k) => `${k}=`).join('\n')}
-#
-# Optional: the Experience Edge context id, for checking published content on Edge.
-SITECORE_EDGE_CONTEXT_ID=
-`;
+const placeholder = keyFileTemplate;
 
 function envStatus(file, name, project, home) {
   if (!fs.existsSync(file)) return null;
@@ -139,10 +133,9 @@ function joinProject(projectDir, flags, deps, print) {
   const skipped = environments.filter((e) => e.status === 'skipped-production');
   if (skipped.length) next.push(`No production file was made. Only people the project lead names get one; a developer runs "content-ops setup join --prod" for them.`);
   if (environments.some((e) => e.status === 'inside-repo')) next.push('A credentials path is inside a git working tree and will be refused. Move it out of the repo.');
-  if (!catalog) next.push('No catalog yet. A developer runs: content-ops catalog build --env <name>, and commits .content-ops/catalog.json.');
   if (gitignore && !gitignore.ok) next.push(`Add ${gitignore.missing.join(', ')} to the repo's .gitignore (a developer commits it); these hold client files, plans and journals.`);
   const first = environments.find((e) => e.status === 'ok') || environments[0];
-  next.push(`${first.status === 'ok' ? 'Run' : 'When a file is filled, run'}: content-ops check --project ${name} --env ${first.name}`);
+  next.push(`${first.status === 'ok' ? 'Run' : 'When a file is filled, run'}: content-ops setup connect --env ${first.name}  (signs in and reads the home page)`);
   const out = { project: name, credentialsDir: dir, environments, engine: { path: ENGINE_BIN, node: process.versions.node, nodeOk: nodeMajor >= 22 }, catalog, gitignore, next };
   if (print) console.log(JSON.stringify(out, null, 1));
   return out;

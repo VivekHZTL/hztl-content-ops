@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need, requireCatalog } from './common.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { buildTemplate } from '../template/intake-sheet.mjs';
 import { writeWorkbook } from '../ingest/xlsx-write.mjs';
 import { toCsv, csvToSheet } from '../ingest/csv.mjs';
@@ -16,7 +16,7 @@ const USAGE = 'content-ops template --page-type <key> [--components a,b] [--chil
 export async function templateCommand(argv, deps = {}) {
   const { flags } = parseArgs(argv);
   const ctx = context(deps);
-  const { catalog } = requireCatalog(ctx.cfg);
+  const { catalog } = await ensureCatalog(ctx, flags.env);
   const pageType = need(flags, 'page-type', USAGE);
   const format = flags.format && flags.format !== true ? String(flags.format) : 'xlsx';
   if (!['xlsx', 'csv'].includes(format)) throw new Error('--format must be xlsx or csv');

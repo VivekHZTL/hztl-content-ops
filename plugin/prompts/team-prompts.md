@@ -5,10 +5,9 @@ own words in the chat, naming the environment and the pages.
 
 ## 1. First time on a project (tech team)
 
-> Use the content-ops skill. Set up this repo for content ops: ask me the setup questions, write the answers
-> file, run setup, tell me exactly where the credentials files go and what keys they need (I will create
-> them myself), then run check for `<env>` and build the catalog from the blueprint pages. Read only until
-> I say otherwise.
+> Use the content-ops skill. Connect me to `<env>`: make the key file if it is missing and tell me where it is
+> (I will fill it myself), sign in, read the home page and tell me what you found. Read only until I say
+> otherwise.
 
 ## 2. New files arrived
 

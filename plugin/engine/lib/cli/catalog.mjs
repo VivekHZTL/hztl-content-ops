@@ -2,38 +2,14 @@
 // `catalog verify <key>` (dev confirms a status) | `catalog show` (page types and components with status).
 import path from 'node:path';
 import { parseArgs } from './args.mjs';
-import { context, emit, need } from './common.mjs';
-import { buildCatalog } from '../catalog/build.mjs';
-import { scanRepoComponents, attachCodePaths } from '../catalog/repo.mjs';
+import { context, emit, need, ensureCatalog } from './common.mjs';
 import { validateCatalog } from '../catalog/schema.mjs';
 import { diffCatalog, verifyComponent } from '../catalog/diff.mjs';
-import { pickRepresentativePages } from '../catalog/discover.mjs';
-import { scanTenant } from '../snapshot/tenant.mjs';
+import { buildProjectCatalog as fresh } from '../catalog/project.mjs';
 import { writeJson } from '../config/project.mjs';
 
 const USAGE = 'content-ops catalog build --env <name> | catalog refresh --env <name> | catalog verify <componentKey> | catalog show';
 
-async function fresh(ctx, env, deps) {
-  const cm = ctx.cmFactory(env);
-  const hints = ctx.cfg.project.placeholders?.hero ? { hero: new RegExp(ctx.cfg.project.placeholders.hero.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) } : undefined;
-  const build = deps.buildCatalogImpl || buildCatalog;
-  const opts = { cm, language: ctx.cfg.rules.language, ...(hints ? { placeholderHints: hints } : {}) };
-  let discovered = null;
-  const hasBlueprints = deps.buildCatalogImpl ? true : !!(await cm.getItem({ path: ctx.cfg.project.blueprintRoot }));
-  if (!hasBlueprints) {
-    // no blueprint folder: pick one representative page per template from the site itself
-    const scan = await (deps.scanImpl || scanTenant)({ client: cm.client, root: ctx.cfg.project.homePath, language: ctx.cfg.rules.language });
-    discovered = pickRepresentativePages(scan);
-    if (!discovered.length) throw new Error(`No pages with a layout found under ${ctx.cfg.project.homePath}, and no blueprint folder at ${ctx.cfg.project.blueprintRoot}`);
-  }
-  const catalog = await build(discovered ? { ...opts, pageIds: discovered.map((d) => d.pageId) } : { ...opts, blueprintRoot: ctx.cfg.project.blueprintRoot });
-  catalog.source = discovered ? 'discovered' : 'blueprints';
-  if (discovered) catalog.discovered = discovered;
-  if (ctx.cfg.project.placeholders?.main) catalog.placeholders.main = ctx.cfg.project.placeholders.main;
-  if (ctx.cfg.project.placeholders?.hero) catalog.placeholders.hero = ctx.cfg.project.placeholders.hero;
-  if (ctx.cfg.project.repoRoot) attachCodePaths(catalog, scanRepoComponents(path.resolve(ctx.projectDir, ctx.cfg.project.repoRoot)));
-  return catalog;
-}
 const file = (ctx) => path.join(ctx.cfg.cfgDir, 'catalog.json');
 const counts = (catalog) => ({ pageTypes: Object.keys(catalog.pageTypes), components: Object.keys(catalog.components).length, placeholders: catalog.placeholders });
 
@@ -60,8 +36,7 @@ export async function catalogCommand(argv, deps = {}) {
     return emit(ctx, { component: _[1], action });
   }
   if (_[0] === 'show') {
-    if (!ctx.cfg.catalog) throw new Error('No .content-ops/catalog.json yet');
-    const c = ctx.cfg.catalog;
+    const { catalog: c } = await ensureCatalog(ctx, flags.env); // first ask builds it from that environment
     return emit(ctx, {
       generatedAt: c.generatedAt, env: c.env,
       pageTypes: Object.entries(c.pageTypes).map(([key, p]) => ({ key, name: p.name, status: p.status || 'ok', layout: p.layout, fields: (p.fields || []).map((f) => f.name) })),
